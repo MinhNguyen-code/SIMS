@@ -15,8 +15,13 @@ namespace DayNeCu3726.Tests.Unit
         [Fact]
         public void Split_SimpleLine_ReturnsEachField()
         {
-            var fields = CsvLineParser.Split("BH00001,Nguyen Van A,a@sims.edu");
+            // Arrange (Chuẩn bị dữ liệu CSV)
+            var csvLine = "BH00001,Nguyen Van A,a@sims.edu";
 
+            // Act (Thực thi hàm Split để tách dòng CSV)
+            var fields = CsvLineParser.Split(csvLine);
+
+            // Assert (Kiểm chứng kết quả tách có đúng số lượng và nội dung không)
             Assert.Equal(3, fields.Count);
             Assert.Equal("BH00001", fields[0]);
             Assert.Equal("Nguyen Van A", fields[1]);
