@@ -1,0 +1,64 @@
+@{
+    ViewData["Title"] = "Service Requests";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0 text-gray-800">My Service Requests</h1>
+        <a href="/ServiceRequest/Create" class="btn btn-primary shadow-sm">
+            <i class="align-middle me-1" data-feather="plus-circle"></i> Create New Request
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Request ID</th>
+                        <th>Type</th>
+                        <th>Title</th>
+                        <th>Submitted On</th>
+                        <th>Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Mock Data -->
+                    <tr>
+                        <td class="ps-4 text-muted">#REQ-1001</td>
+                        <td><span class="badge bg-info text-dark">Certificate</span></td>
+                        <td>Request for Enrollment Certificate</td>
+                        <td>Oct 15, 2023</td>
+                        <td><span class="badge bg-warning text-dark">Pending</span></td>
+                        <td class="text-end pe-4">
+                            <a href="/ServiceRequest/Details/1" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 text-muted">#REQ-1002</td>
+                        <td><span class="badge bg-secondary">Leave</span></td>
+                        <td>Absence Request for Medical Reasons</td>
+                        <td>Oct 10, 2023</td>
+                        <td><span class="badge bg-success">Approved</span></td>
+                        <td class="text-end pe-4">
+                            <a href="/ServiceRequest/Details/2" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4 text-muted">#REQ-1003</td>
+                        <td><span class="badge bg-danger">Other</span></td>
+                        <td>Re-evaluation of Midterm Exam</td>
+                        <td>Sep 28, 2023</td>
+                        <td><span class="badge bg-danger">Rejected</span></td>
+                        <td class="text-end pe-4">
+                            <a href="/ServiceRequest/Details/3" class="btn btn-sm btn-outline-primary">View</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

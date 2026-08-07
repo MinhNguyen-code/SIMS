@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    // ── Recommended: no SQL Server required ────────────────────────────────
+    // Creates a local sims.db SQLite file on first run. Pick this profile in the
+    // Visual Studio run dropdown if you do not have SQL Server LocalDB installed.
+    "SQLite (no SQL Server needed)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7010;http://localhost:5128",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "Database__Provider": "Sqlite",
+        "ConnectionStrings__DefaultConnection": "Data Source=sims.db"
+      }
+    },
+
+    // ── Uses the connection string from appsettings.json (SQL Server LocalDB) ──
+    "https": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "https://localhost:7010;http://localhost:5128",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    },
+    "http": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "applicationUrl": "http://localhost:5128",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}

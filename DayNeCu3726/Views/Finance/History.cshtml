@@ -1,0 +1,46 @@
+@{
+    ViewData["Title"] = "Payment History";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0 text-gray-800">Payment History</h1>
+        <a href="/Finance" class="btn btn-outline-secondary btn-sm">
+            <i class="align-middle me-1" data-feather="arrow-left"></i> Back to Finance
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Date</th>
+                        <th>Transaction Code</th>
+                        <th>Description</th>
+                        <th>Method</th>
+                        <th class="text-end pe-4">Amount (VND)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-4">Sep 15, 2023</td>
+                        <td><span class="font-monospace text-muted">TXN-98237192</span></td>
+                        <td>First Installment - Fall 2023</td>
+                        <td><span class="badge bg-light text-dark border">VNPAY</span></td>
+                        <td class="text-end pe-4 fw-bold text-success">+ 9,000,000</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-4">Jan 10, 2023</td>
+                        <td><span class="font-monospace text-muted">TXN-45928374</span></td>
+                        <td>Full Payment - Spring 2023</td>
+                        <td><span class="badge bg-light text-dark border">Bank Transfer</span></td>
+                        <td class="text-end pe-4 fw-bold text-success">+ 18,000,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

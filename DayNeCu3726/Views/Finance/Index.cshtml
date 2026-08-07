@@ -1,0 +1,116 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.TuitionViewModel>
+@{
+    ViewData["Title"] = "Tuition & Finance";
+
+    // Bound from the signed-in student's own tuition records. The previous version
+    // displayed the same three fixed amounts (18,000,000 / 9,000,000 / 9,000,000 VND)
+    // for every user regardless of what was actually owed.
+    var tuitions = Model?.ToList() ?? new List<DayNeCu3726.Models.ViewModels.TuitionViewModel>();
+
+    var totalBilled = tuitions.Sum(t => t.TotalAmount);
+    var totalPaid = tuitions.Sum(t => t.PaidAmount);
+    var totalRemaining = totalBilled - totalPaid;
+    var paidRate = totalBilled > 0 ? (double)(totalPaid / totalBilled) * 100 : 0;
+
+    string Vnd(decimal amount) => amount.ToString("N0") + " ₫";
+}
+
+<div class="sims-page-head">
+    <div>
+        <div class="sims-rule"></div>
+        <h1 class="sims-page-head__title">Tuition &amp; Finance</h1>
+        <p class="sims-page-head__sub">Your tuition statements and payment status.</p>
+    </div>
+</div>
+
+<div class="sims-kpi-grid">
+    <article class="sims-kpi">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Total Fee</span>
+            <span class="sims-kpi__icon"><i data-feather="file-text"></i></span>
+        </div>
+        <div class="sims-kpi__value" style="font-size:1.45rem;">@Vnd(totalBilled)</div>
+        <div class="sims-kpi__foot">@tuitions.Count semester statement(s)</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--success">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Paid</span>
+            <span class="sims-kpi__icon"><i data-feather="check-circle"></i></span>
+        </div>
+        <div class="sims-kpi__value" style="font-size:1.45rem;">@Vnd(totalPaid)</div>
+        <div class="sims-kpi__foot"><span class="sims-kpi__delta sims-kpi__delta--up">@paidRate.ToString("F0")%</span> settled</div>
+    </article>
+
+    <article class="sims-kpi @(totalRemaining > 0 ? "sims-kpi--danger" : "sims-kpi--info")">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Remaining</span>
+            <span class="sims-kpi__icon"><i data-feather="alert-circle"></i></span>
+        </div>
+        <div class="sims-kpi__value" style="font-size:1.45rem;">@Vnd(totalRemaining)</div>
+        <div class="sims-kpi__foot">@(totalRemaining > 0 ? "Payment outstanding" : "Nothing owing")</div>
+    </article>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">Tuition Statements</h2>
+            <p class="card-subtitle">One row per semester</p>
+        </div>
+    </div>
+
+    @if (tuitions.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Semester</th>
+                        <th scope="col" class="text-end">Total</th>
+                        <th scope="col" class="text-end">Paid</th>
+                        <th scope="col" class="text-end">Remaining</th>
+                        <th scope="col">Status</th>
+                        <th scope="col">Due date</th>
+                        <th scope="col" class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var t in tuitions)
+                {
+                    <tr>
+                        <td style="font-weight:600;">@t.Semester</td>
+                        <td class="text-end tabular">@Vnd(t.TotalAmount)</td>
+                        <td class="text-end tabular text-success">@Vnd(t.PaidAmount)</td>
+                        <td class="text-end tabular @(t.RemainingAmount > 0 ? "text-danger" : "text-muted")"
+                            style="font-weight:650;">@Vnd(t.RemainingAmount)</td>
+                        <td><span class="badge @t.StatusBadgeClass">@t.StatusText</span></td>
+                        <td style="font-size:12.5px;color:var(--sims-muted);">@t.DueDate.ToString("dd/MM/yyyy")</td>
+                        <td class="text-end">
+                            <div class="d-inline-flex gap-1">
+                                <a href="/Finance/History?tuitionId=@t.TuitionId" class="btn btn-sm btn-outline-secondary">
+                                    <i data-feather="clock"></i> History
+                                </a>
+                                @if (t.RemainingAmount > 0)
+                                {
+                                    <a href="/Finance/Pay?tuitionId=@t.TuitionId" class="btn btn-sm btn-primary">
+                                        <i data-feather="credit-card"></i> Pay
+                                    </a>
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sims-empty">
+            <div class="sims-empty__icon"><i data-feather="credit-card"></i></div>
+            <div class="sims-empty__title">No tuition statements</div>
+            <p class="sims-empty__text">Nothing has been billed to your account yet.</p>
+        </div>
+    }
+</div>

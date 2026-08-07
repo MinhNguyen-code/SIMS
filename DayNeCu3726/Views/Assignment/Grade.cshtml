@@ -1,0 +1,49 @@
+@model DayNeCu3726.Models.ViewModels.SubmissionViewModel
+@{
+    ViewData["Title"] = "Grade Submission";
+    var assignment = ViewBag.Assignment as DayNeCu3726.Models.Entities.Assignment;
+}
+
+<div class="mb-3">
+    <a href="/Assignment/Submissions/@assignment?.AssignmentId" class="text-decoration-none"><i data-feather="arrow-left"></i> Back to Submissions</a>
+</div>
+
+<h1 class="h3 mb-3">Grade Submission</h1>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Grading Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Assignment/Grade/@Model.SubmissionId">
+                    @Html.AntiForgeryToken()
+                    <div class="mb-3">
+                        <label class="form-label">Student</label>
+                        <input type="text" class="form-control" value="@Model.StudentName (@Model.StudentCode)" disabled />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Grade (0-10)</label>
+                        <input type="number" step="0.1" min="0" max="10" name="grade" class="form-control" value="@Model.Grade" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Feedback</label>
+                        <textarea name="feedback" class="form-control" rows="4">@Model.Feedback</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Save Grade</button>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">PDF Viewer - @Model.OriginalFileName</h5>
+            </div>
+            <div class="card-body p-0">
+                <iframe src="~/uploads/assignments/@Model.FilePath" width="100%" height="600px" style="border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+</div>

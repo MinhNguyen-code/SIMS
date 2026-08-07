@@ -1,0 +1,71 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "My Assigned Courses";
+    // Mock data for UI demonstration
+    var courses = new[]
+    {
+        new { Id = 1, Code = "PROG102", Name = "Introduction to Programming", Semester = "Fall 2026", StudentCount = 30 },
+        new { Id = 2, Code = "WEB201", Name = "Web Development Fundamentals", Semester = "Fall 2026", StudentCount = 28 },
+        new { Id = 3, Code = "DB305", Name = "Database Design", Semester = "Fall 2026", StudentCount = 35 }
+    };
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-2 text-gray-800">My Assigned Courses</h1>
+        <p class="text-muted">Manage your classes, record attendance, and enter grades.</p>
+    </div>
+</div>
+
+<div class="row">
+    @if (Model != null)
+    {
+        // loop through real model here
+    }
+    
+    @foreach (var course in courses)
+    {
+        <div class="col-12 col-md-6 col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm border-0 class-card">
+                <div class="card-header bg-white border-bottom pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <span class="badge bg-soft-primary text-primary fw-bold px-3 py-2">@course.Semester</span>
+                    <span class="text-muted small"><i data-feather="users" class="me-1"></i> @course.StudentCount Students</span>
+                </div>
+                <div class="card-body px-4 py-4">
+                    <h4 class="card-title fw-bold text-dark mb-1">@course.Code</h4>
+                    <p class="card-text text-muted mb-4">@course.Name</p>
+                    
+                    <a href="/Enrollment/CourseRoster?courseId=@course.Id" class="btn btn-primary w-100 fw-semibold shadow-sm">
+                        Manage Course <i data-feather="arrow-right" class="ms-1" style="width:16px;height:16px"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .bg-soft-primary {
+        background-color: rgba(20, 59, 107, 0.1);
+    }
+    .text-primary {
+        color: var(--sims-navy-700) !important;
+    }
+    .btn-primary {
+        background-color: var(--sims-navy-700);
+        border-color: var(--sims-navy-700);
+    }
+    .btn-primary:hover {
+        background-color: var(--sims-navy-800);
+        border-color: var(--sims-navy-800);
+    }
+    .class-card {
+        border-radius: 12px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .class-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+    }
+</style>

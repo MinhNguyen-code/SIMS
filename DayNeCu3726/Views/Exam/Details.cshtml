@@ -1,0 +1,72 @@
+@model DayNeCu3726.Models.ViewModels.ExamDetailsViewModel
+@{
+    ViewData["Title"] = "Chi tiết Lịch thi";
+    var exam = Model.Exam;
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between">
+        <h1 class="h3 mb-0"><i data-feather="map-pin" class="sims-h-ico"></i> Exam Details: @exam.CourseName</h1>
+        <a href="/Exam" class="btn btn-secondary">Back</a>
+    </div>
+</div>
+
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Course:</strong> @exam.CourseCode - @exam.CourseName</p>
+                <p><strong>Type:</strong> @exam.ExamType</p>
+                <p><strong>Semester:</strong> @exam.Semester</p>
+                <p><strong>Status:</strong> <span class="badge @exam.StatusBadgeClass">@exam.Status</span></p>
+            </div>
+            <div class="col-md-6">
+                <p><strong>Exam Date:</strong> @exam.ExamDate.ToString("dd/MM/yyyy")</p>
+                <p><strong>Time Slot:</strong> @exam.TimeSlot</p>
+                <p><strong>Room:</strong> @exam.Room</p>
+                <p><strong>Supervisor:</strong> @(exam.SupervisorName ?? "Unassigned")</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title mb-0"><i data-feather="users" class="sims-h-ico"></i> List of Eligible Students (@Model.EligibleStudents.Count())</h5>
+        <small class="text-muted">Students with absences <= 6</small>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-striped my-0">
+                <thead>
+                    <tr>
+                        <th>Student Code</th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Class / Program</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (!Model.EligibleStudents.Any())
+                    {
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-3">No eligible students found</td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var s in Model.EligibleStudents)
+                        {
+                            <tr>
+                                <td>@s.StudentCode</td>
+                                <td><strong>@s.FullName</strong></td>
+                                <td>@s.Email</td>
+                                <td>@s.Program</td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

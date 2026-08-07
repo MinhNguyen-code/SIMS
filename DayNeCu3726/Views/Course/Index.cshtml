@@ -1,0 +1,162 @@
+@model DayNeCu3726.Models.ViewModels.CourseListViewModel
+@{
+    ViewData["Title"] = "Courses List";
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="book-open" class="sims-h-ico"></i> BTEC Courses Directory</h1>
+            <p class="text-muted mb-0">Manage and view all registered courses (@Model.TotalCount total)</p>
+        </div>
+        @if (role != "Student")
+        {
+            <a href="/Course/Create" class="btn btn-primary">
+                <i class="align-middle" data-feather="plus"></i> New Course
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Search Bar & Filters -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0">
+                        <i data-feather="search" class="text-muted" style="width:16px;height:16px;"></i>
+                    </span>
+                    <input name="search" value="@Model.SearchQuery" class="form-control border-start-0" 
+                           placeholder="Search by course code or course name..." />
+                </div>
+            </div>
+            <div class="col-md-3 d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary flex-fill">Search</button>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <a href="/Course" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+@functions {
+    public static string GetTermNo(string semester)
+    {
+        return semester switch {
+            "Spring 2025" => "Term 1",
+            "Summer 2025" => "Term 2",
+            "Fall 2025" => "Term 3",
+            "Spring 2026" => "Term 4",
+            "Summer 2026" => "Term 5",
+            "Fall 2026" => "Term 6",
+            _ => "TBA"
+        };
+    }
+}
+
+<!-- Course List Card -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Courses.Any())
+        {
+            <div class="text-center py-5">
+                <i data-feather="book-open" style="width:48px;height:48px;" class="text-muted mb-3"></i>
+                <p class="text-muted">No courses found.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover my-0">
+                    <thead>
+                        <tr>
+                            <th style="width:12%;">Code</th>
+                            <th style="width:12%;">Term</th>
+                            <th style="width:30%;">Course Name</th>
+                            <th>Credits</th>
+                            <th>Faculty</th>
+                            <th style="width:20%;">Duration / Schedule</th>
+                            <th>Enrollment</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var c in Model.Courses)
+                    {
+                        var pct = c.MaxEnrollment > 0 ? (double)c.CurrentEnrollment / c.MaxEnrollment * 100 : 0;
+                        var barColor = pct >= 90 ? "danger" : pct >= 70 ? "warning" : "success";
+                        
+                        var statusClass = c.Status.ToString() switch {
+                            "Active" => "bg-success",
+                            "Completed" => "bg-primary",
+                            "Cancelled" => "bg-danger",
+                            _ => "bg-secondary"
+                        };
+ 
+                        <tr>
+                            <td><span class="badge bg-light text-dark fw-bold" style="font-size:12px;">@c.CourseCode</span></td>
+                            <td><span class="badge bg-warning-light text-warning fw-bold">@GetTermNo(c.Semester)</span></td>
+                            <td>
+                                <strong>@c.Name</strong><br/>
+                                <small class="text-muted">Classroom: @c.Classroom</small>
+                            </td>
+                            <td><span class="badge bg-info-light text-info">@c.Credits cr</span></td>
+                            <td class="text-sm">@(string.IsNullOrEmpty(c.FacultyName) ? "TBA" : c.FacultyName)</td>
+                            <td class="text-sm text-muted">@c.Schedule</td>
+                            <td>
+                                <div class="d-flex align-items-center justify-content-between mb-1" style="min-width: 100px;">
+                                    <small class="text-muted">@c.CurrentEnrollment / @c.MaxEnrollment</small>
+                                    <small class="text-muted font-weight-bold">@pct.ToString("F0")%</small>
+                                </div>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-@barColor" style="width: @pct.ToString("F0")%"></div>
+                                </div>
+                            </td>
+                            <td><span class="badge @statusClass">@c.Status</span></td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a href="/Course/Details/@c.CourseId" class="btn btn-sm btn-outline-primary">
+                                        <i class="align-middle" data-feather="eye" style="width:14px;height:14px;"></i> View
+                                    </a>
+                                    @if (role != "Student")
+                                    {
+                                        <a href="/Course/Edit/@c.CourseId" class="btn btn-sm btn-outline-warning" title="Edit">
+                                            <i class="align-middle" data-feather="edit" style="width:14px;height:14px;"></i>
+                                        </a>
+                                    }
+                                    @if (role == "Admin")
+                                    {
+                                        <a href="/Enrollment/Manage?courseId=@c.CourseId" class="btn btn-sm btn-outline-info" title="Manage Enrollments">
+                                            <i class="align-middle" data-feather="users" style="width:14px;height:14px;"></i>
+                                        </a>
+                                        <a href="/Course/Delete/@c.CourseId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                            <i class="align-middle" data-feather="trash-2" style="width:14px;height:14px;"></i>
+                                        </a>
+                                    }
+                                    @if (role == "Faculty")
+                                    {
+                                        <a href="/Enrollment/CourseRoster/@c.CourseId" class="btn btn-sm btn-outline-success" title="Roster">
+                                            <i class="align-middle" data-feather="users" style="width:14px;height:14px;"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<style>
+.bg-info-light {
+    background-color: rgba(59, 125, 221, 0.1) !important;
+}
+</style>

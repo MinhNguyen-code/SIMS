@@ -1,0 +1,244 @@
+@model DayNeCu3726.Models.ViewModels.DatasetImportViewModel
+@{
+    ViewData["Title"] = "Bulk Dataset Processing";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="h3 mb-0"><i data-feather="bar-chart-2" class="sims-h-ico"></i> Bulk Dataset Processing</h1>
+        <p class="text-muted mb-0"> Import, export and analyse large student datasets stored as CSV files.
+            Files are streamed row by row, so memory usage stays constant regardless of file size.
+        </p>
+    </div>
+</div>
+
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger" role="alert">
+        <ul class="mb-0">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+
+<div class="row">
+    <!--  Import / Analyse  -->
+    <div class="col-lg-7">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Import students from CSV</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" asp-action="Import">
+                    @Html.AntiForgeryToken()
+
+                    <div class="mb-3">
+                        <label for="file" class="form-label">CSV file</label>
+                        <input type="file" id="file" name="file" accept=".csv" class="form-control"
+                               aria-describedby="fileHelp" required />
+                        <div id="fileHelp" class="form-text"> Required columns: <code>FullName</code>, <code>Email</code>, <code>Program</code>.
+                            <a asp-action="Template">Download a blank template</a>.
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="BatchSize" class="form-label"></label>
+                            <input asp-for="BatchSize" type="number" min="1" max="50000" class="form-control"
+                                   aria-describedby="batchHelp" />
+                            <div id="batchHelp" class="form-text">Rows committed per database transaction.</div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <fieldset>
+                                <legend class="form-label fs-6">Options</legend>
+
+                                <div class="form-check">
+                                    <input asp-for="ValidateOnly" class="form-check-input" />
+                                    <label asp-for="ValidateOnly" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="UpdateExisting" class="form-check-input" />
+                                    <label asp-for="UpdateExisting" class="form-check-label"></label>
+                                </div>
+                                <div class="form-check">
+                                    <input asp-for="StopOnFirstError" class="form-check-input" />
+                                    <label asp-for="StopOnFirstError" class="form-check-label"></label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">Run import</button>
+                    <button type="submit" formaction="@Url.Action("Analyze")" class="btn btn-outline-secondary"> Analyse only
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!--  Export / Generate  -->
+    <div class="col-lg-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Export &amp; sample data</h5>
+            </div>
+            <div class="card-body">
+                <p class="text-muted"> Exports stream directly to the response, so a dataset of any size can be downloaded
+                    without buffering it in server memory.
+                </p>
+
+                <a asp-action="Export" class="btn btn-success mb-2 w-100"><i data-feather="download" class="sims-h-ico"></i> Export all students (CSV)</a>
+                <a asp-action="Template" class="btn btn-outline-secondary mb-3 w-100"><i data-feather="download" class="sims-h-ico"></i> Download import template</a>
+
+                <hr />
+
+                <form method="get" asp-action="GenerateSample" class="row g-2 align-items-end">
+                    <div class="col-7">
+                        <label for="recordCount" class="form-label">Sample records</label>
+                        <input type="number" id="recordCount" name="recordCount" value="50000"
+                               min="1" max="500000" step="1000" class="form-control" />
+                    </div>
+                    <div class="col-5">
+                        <button type="submit" class="btn btn-outline-primary w-100">Generate</button>
+                    </div>
+                </form>
+                <div class="form-text">Generates a synthetic dataset for benchmarking the importer.</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.Result is not null)
+{
+    var result = Model.Result;
+
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5 class="card-title mb-0">
+                @(result.ValidateOnly ? "Validation report" : "Import report")
+            </h5>
+        </div>
+        <div class="card-body">
+            <div class="alert @(result.IsSuccess ? "alert-success" : "alert-warning")" role="status">
+                @result.Summary()
+            </div>
+
+            <div class="row text-center">
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0">@result.TotalRowsRead</div>
+                    <small class="text-muted">Rows read</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0 text-success">@result.SuccessCount</div>
+                    <small class="text-muted">Succeeded</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0 text-danger">@result.FailureCount</div>
+                    <small class="text-muted">Failed</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0 text-secondary">@result.SkippedCount</div>
+                    <small class="text-muted">Skipped</small>
+                </div>
+            </div>
+
+            <dl class="row mt-3 mb-0">
+                <dt class="col-sm-4">Batches committed</dt>
+                <dd class="col-sm-8">@result.BatchesCommitted</dd>
+
+                <dt class="col-sm-4">Throughput</dt>
+                <dd class="col-sm-8">@result.RowsPerSecond rows/second</dd>
+            </dl>
+
+            @if (result.Errors.Count > 0)
+            {
+                <h6 class="mt-4">Rejected rows</h6>
+                <div class="table-responsive">
+                    <table class="table table-sm table-striped">
+                        <caption>Rows that failed validation and were not imported</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Line</th>
+                                <th scope="col">Column</th>
+                                <th scope="col">Reason</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var error in result.Errors)
+                        {
+                            <tr>
+                                <td>@error.LineNumber</td>
+                                <td><code>@error.Column</code></td>
+                                <td>@error.Message</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (Model.Statistics is not null)
+{
+    var stats = Model.Statistics;
+
+    <div class="card mt-3">
+        <div class="card-header">
+            <h5 class="card-title mb-0">Dataset analysis</h5>
+        </div>
+        <div class="card-body">
+            <div class="row text-center mb-3">
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0">@stats.TotalRecords</div>
+                    <small class="text-muted">Records scanned</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0">@stats.AverageGpa</div>
+                    <small class="text-muted">Average GPA</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0">@stats.MinimumGpa – @stats.MaximumGpa</div>
+                    <small class="text-muted">GPA range</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="h4 mb-0">@stats.RowsPerSecond</div>
+                    <small class="text-muted">Rows/second</small>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h6>Students per program</h6>
+                    <table class="table table-sm">
+                        <caption>Record count grouped by academic program</caption>
+                        <thead><tr><th scope="col">Program</th><th scope="col">Count</th></tr></thead>
+                        <tbody>
+                        @foreach (var entry in stats.CountByProgram.OrderByDescending(e => e.Value))
+                        {
+                            <tr><td>@entry.Key</td><td>@entry.Value</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-6">
+                    <h6>Students per enrollment year</h6>
+                    <table class="table table-sm">
+                        <caption>Record count grouped by enrollment year</caption>
+                        <thead><tr><th scope="col">Year</th><th scope="col">Count</th></tr></thead>
+                        <tbody>
+                        @foreach (var entry in stats.CountByEnrollmentYear.OrderBy(e => e.Key))
+                        {
+                            <tr><td>@entry.Key</td><td>@entry.Value</td></tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}

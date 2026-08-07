@@ -1,0 +1,87 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Create Announcement";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-2">
+                <li class="breadcrumb-item"><a href="/Announcement" class="text-decoration-none text-primary">Announcements</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create</li>
+            </ol>
+        </nav>
+        <h1 class="h3 mb-0 text-gray-800">Create new announcement</h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-12 col-xl-8">
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-body p-4">
+                <form action="/Announcement/Create" method="post">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Title</label>
+                        <input type="text" class="form-control" name="Title" placeholder="Enter announcement title" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Scope</label>
+                        <select class="form-select" name="Scope">
+                            <option value="Global">Global (All Users)</option>
+                            <option value="Students">All Students</option>
+                            <option value="Faculty">All Faculty</option>
+                            <!-- You can populate course-specific scopes dynamically -->
+                            <option value="Course:PROG102">Course: PROG102</option>
+                        </select>
+                        <div class="form-text">Select who can see this announcement.</div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label fw-semibold">Content</label>
+                        <textarea class="form-control" name="Content" rows="6" placeholder="Write your announcement here..." required></textarea>
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        <input type="checkbox" class="form-check-input" id="isPinned" name="IsPinned" value="true">
+                        <label class="form-check-label text-dark" for="isPinned">Pin this announcement to the top</label>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="/Announcement" class="btn btn-light me-2">Cancel</a>
+                        <button type="submit" class="btn btn-primary px-4">Publish Announcement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 col-xl-4 mt-4 mt-xl-0">
+        <div class="card shadow-sm border-0 bg-light" style="border-radius: 12px;">
+            <div class="card-body p-4">
+                <h5 class="fw-bold mb-3"><i data-feather="info" class="me-2 text-primary"></i>Tips</h5>
+                <ul class="text-muted small ps-3 mb-0">
+                    <li class="mb-2">Keep titles clear and concise.</li>
+                    <li class="mb-2">Use the <strong>Scope</strong> to target specific audiences and avoid spamming everyone.</li>
+                    <li>Pinned announcements stay at the top until unpinned. Use sparingly for critical information.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .text-primary {
+        color: var(--sims-navy-700) !important;
+    }
+    .btn-primary {
+        background-color: var(--sims-navy-700);
+        border-color: var(--sims-navy-700);
+    }
+    .btn-primary:hover {
+        background-color: var(--sims-navy-800);
+        border-color: var(--sims-navy-800);
+    }
+</style>

@@ -1,0 +1,106 @@
+@model DayNeCu3726.Models.ViewModels.FacultyViewModel
+@{
+    ViewData["Title"] = "Faculty Details";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0">Faculty Details</h1>
+        <div>
+            <a href="/Faculty/Edit/@Model.Id" class="btn btn-warning">
+                <i class="align-middle" data-feather="edit"></i> Edit
+            </a>
+            <a href="/Faculty" class="btn btn-outline-secondary">
+                <i class="align-middle" data-feather="arrow-left"></i> Back to List
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width:100px; height:100px; font-size:40px;">
+                        @(Model.FullName.Substring(0, 1))
+                    </div>
+                </div>
+                <h4 class="mb-0">@Model.FullName</h4>
+                <div class="text-muted mb-2">@Model.FacultyCode</div>
+                <div class="mb-3">
+                    @if(Model.IsActive) { <span class="badge bg-success">Active</span> }
+                    else { <span class="badge bg-danger">Inactive</span> }
+                </div>
+            </div>
+            <hr class="my-0" />
+            <div class="card-body">
+                <h5 class="h6 card-title">About</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-1"><span data-feather="briefcase" class="feather-sm me-1"></span> @Model.Department</li>
+                    <li class="mb-1"><span data-feather="award" class="feather-sm me-1"></span> @Model.Position</li>
+                    <li class="mb-1"><span data-feather="book-open" class="feather-sm me-1"></span> @Model.Specialization</li>
+                    <li class="mb-1"><span data-feather="map-pin" class="feather-sm me-1"></span> @Model.Address</li>
+                </ul>
+            </div>
+            <hr class="my-0" />
+            <div class="card-body">
+                <h5 class="h6 card-title">Contact</h5>
+                <ul class="list-unstyled mb-0">
+                    <li class="mb-1"><span data-feather="mail" class="feather-sm me-1"></span> @Model.Email</li>
+                    <li class="mb-1"><span data-feather="phone" class="feather-sm me-1"></span> @Model.PhoneNumber</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">Assigned Courses</h5>
+                <a href="/Course" class="btn btn-sm btn-primary">
+                    <i data-feather="plus"></i> Assign to Course
+                </a>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-3">To assign this lecturer to a new course, click the button above, go to <strong>Courses</strong>, then Edit the course and select this lecturer in the Faculty dropdown.</p>
+
+                @if (!Model.TeachingCourses.Any())
+                {
+                    <div class="alert alert-info">
+                        This faculty member is not currently assigned to any courses.
+                    </div>
+                }
+                else
+                {
+                    <table class="table table-sm table-hover">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Term</th>
+                                <th>Schedule</th>
+                                <th>Enrollment</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model.TeachingCourses)
+                            {
+                                <tr>
+                                    <td><span class="badge bg-light text-dark">@c.CourseCode</span></td>
+                                    <td><strong>@c.Name</strong></td>
+                                    <td>@c.Semester</td>
+                                    <td>@c.Schedule</td>
+                                    <td>@c.CurrentEnrollment / @c.MaxEnrollment</td>
+                                    <td class="text-end">
+                                        <a href="/Course/Details/@c.CourseId" class="btn btn-sm btn-outline-primary">View</a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+        </div>
+    </div>
+</div>

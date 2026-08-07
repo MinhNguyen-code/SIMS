@@ -1,0 +1,36 @@
+@model DayNeCu3726.Models.ViewModels.CourseViewModel
+@{
+    ViewData["Title"] = "Delete Course";
+}
+
+<div class="page-header">
+    <h1 class="page-title" style="color:var(--danger);"><i data-feather="trash-2" class="sims-h-ico"></i> Delete Course</h1>
+    <a href="/Course" class="btn btn-secondary"><i data-feather="arrow-left" class="sims-h-ico"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:560px;">
+    <div class="card-body" style="text-align:center; padding:40px;">
+        <div style="font-size:52px; margin-bottom:16px;"><i data-feather="alert-triangle" class="sims-h-ico"></i></div>
+        <h2 style="color:var(--text-primary); margin-bottom:8px;">Are you sure?</h2>
+        <p class="text-muted" style="margin-bottom:24px;"> You are about to permanently delete course
+            <strong style="color:var(--text-primary);">@Model.CourseCode – @Model.Name</strong>.
+            This cannot be undone.
+        </p>
+
+        <div class="card" style="text-align:left; margin-bottom:24px; background:var(--bg-elevated);">
+            <div class="card-body">
+                <div class="fw-700">@Model.CourseCode</div>
+                <div class="text-muted text-sm">@Model.Name</div>
+                <div class="text-muted text-sm">@Model.Credits credits · @Model.CurrentEnrollment enrolled</div>
+            </div>
+        </div>
+
+        <form asp-action="Delete" asp-route-id="@Model.CourseId" method="post">
+            @Html.AntiForgeryToken()
+            <div class="d-flex gap-12" style="justify-content:center;">
+                <button type="submit" class="btn btn-danger btn-lg"><i data-feather="trash-2" class="sims-h-ico"></i> Yes, Delete</button>
+                <a href="/Course" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

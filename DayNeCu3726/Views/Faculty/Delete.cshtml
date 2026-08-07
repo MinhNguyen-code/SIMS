@@ -1,0 +1,43 @@
+@model DayNeCu3726.Models.ViewModels.FacultyViewModel
+@{
+    ViewData["Title"] = "Delete Faculty";
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="h3 mb-0 text-danger">Delete Faculty</h1>
+    </div>
+</div>
+
+<div class="card border-danger">
+    <div class="card-body">
+        <div class="alert alert-warning">
+            <i class="align-middle me-2" data-feather="alert-triangle"></i>
+            <strong>Warning:</strong> You are about to delete the faculty account for <strong>@Model.FullName</strong>.
+        </div>
+        
+        <p>Are you sure you want to delete this faculty member? This action cannot be undone.</p>
+        
+        <dl class="row mb-4">
+            <dt class="col-sm-3">Faculty Code</dt>
+            <dd class="col-sm-9">@Model.FacultyCode</dd>
+
+            <dt class="col-sm-3">Full Name</dt>
+            <dd class="col-sm-9">@Model.FullName</dd>
+
+            <dt class="col-sm-3">Email</dt>
+            <dd class="col-sm-9">@Model.Email</dd>
+            
+            <dt class="col-sm-3">Department</dt>
+            <dd class="col-sm-9">@Model.Department</dd>
+        </dl>
+
+        <form asp-action="Delete" method="post" class="d-inline">
+            <input type="hidden" asp-for="Id" />
+            <button type="submit" class="btn btn-danger">
+                <i class="align-middle" data-feather="trash-2"></i> Delete Faculty
+            </button>
+            <a href="/Faculty" class="btn btn-outline-secondary ms-2">Cancel</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,199 @@
+@model DayNeCu3726.Models.ViewModels.StudentViewModel
+@using DayNeCu3726.Patterns.Singleton
+@using DayNeCu3726.Models.Enums
+@{
+    ViewData["Title"] = "Student Profile";
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="row mb-3 d-print-none">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="user" class="sims-h-ico"></i> Student Profile</h1>
+            <p class="text-muted mb-0">Details for <strong>@Model.FullName</strong></p>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="window.print()" class="btn btn-primary" style="background-color: var(--sims-navy-700); border-color: var(--sims-navy-700);">
+                <i class="align-middle" data-feather="printer"></i> Export / Print Profile
+            </button>
+            @if (role == "Admin")
+            {
+                <a href="/Enrollment/ManageStudent?studentId=@Model.Id" class="btn btn-info" style="color: white;">
+                    <i class="align-middle" data-feather="book"></i> Manage Enrollments
+                </a>
+                <a href="/Student/Edit/@Model.Id" class="btn btn-warning">
+                    <i class="align-middle" data-feather="edit"></i> Edit
+                </a>
+                <a href="/Student/Delete/@Model.Id" class="btn btn-danger">
+                    <i class="align-middle" data-feather="trash-2"></i> Delete
+                </a>
+            }
+            <a href="/Student" class="btn btn-outline-secondary">Back to List</a>
+        </div>
+    </div>
+</div>
+
+<!-- Print-Only Header -->
+<div class="d-none d-print-block mb-4">
+    <div class="row align-items-center">
+        <div class="col-4">
+            <img src="/images/StudentPage/Sidebar/btec.svg" alt="BTEC Logo" style="height: 50px;" />
+        </div>
+        <div class="col-8 text-end">
+            <h3 class="mb-0 fw-bold" style="color: var(--sims-navy-700);">FPT BTEC ALLIANCE</h3>
+            <p class="text-muted small mb-0">Official Student Profile Report</p>
+            <p class="text-muted small mb-0">Date Generated: @DateTime.Today.ToString("dd/MM/yyyy")</p>
+        </div>
+    </div>
+    <hr style="border-top: 2px solid var(--sims-navy-700);" />
+</div>
+
+<div class="row">
+    <!-- Left Column: Profile Card -->
+    <div class="col-md-4">
+        <div class="card text-center py-4">
+            <div class="card-body">
+                <div class="avatar-circle mx-auto mb-3">@Model.FullName[0]</div>
+                <h4 class="card-title mb-0">@Model.FullName</h4>
+                <p class="text-muted small">@Model.StudentCode</p>
+                <div class="mb-3">
+                    @{
+                        var statusClass = Model.AcademicStatus.ToString() switch {
+                            "Active" => "bg-success",
+                            "Graduated" => "bg-primary",
+                            "OnLeave" => "bg-warning",
+                            _ => "bg-danger"
+                        };
+                    }
+                    <span class="badge @statusClass">@Model.AcademicStatus</span>
+                </div>
+
+                <hr />
+
+                @if (SystemConfiguration.Instance.GradingScheme == GradingScheme.Btec)
+                {
+                    <div class="p-3 bg-light rounded text-center">
+                        <span class="text-muted small d-block">BTEC Academic System</span>
+                        <h4 class="text-primary mt-1 mb-0">Grading: P / M / D</h4>
+                        <div class="form-text mt-2 text-xs">Standard BTEC system evaluation, no GPA computed.</div>
+                    </div>
+                }
+                else
+                {
+                    <div class="p-3 bg-light rounded text-center">
+                        <span class="text-muted small d-block mb-1">GPA Score</span>
+                        <h2 class="text-primary mb-0">@Model.GPA.ToString("F2")</h2>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Personal Information -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i data-feather="clipboard" class="sims-h-ico"></i> Personal & Academic Information</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-hover mb-0">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold" style="width:35%;">Student Code</td>
+                            <td><span class="badge bg-light text-dark">@Model.StudentCode</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Date of Birth</td>
+                            <td>@Model.DateOfBirth.ToString("dd MMM yyyy")</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Gender</td>
+                            <td>@Model.Gender</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Phone Number</td>
+                            <td>@(string.IsNullOrEmpty(Model.PhoneNumber) ? "—" : Model.PhoneNumber)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Email Address</td>
+                            <td>@Model.Email</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Address</td>
+                            <td>@(string.IsNullOrEmpty(Model.Address) ? "—" : Model.Address)</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Program</td>
+                            <td>@Model.Program</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Department</td>
+                            <td>@Model.Department</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold">Enrollment Year</td>
+                            <td>@Model.EnrollmentYear</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-circle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--sims-navy-700);
+    color: white;
+    font-size: 28px;
+    font-weight: 700;
+}
+
+/* Print-Specific Styling */
+@@media print {
+    .sidebar, .navbar, .footer, .btn, .breadcrumb, header, .d-print-none, .d-flex.gap-2 {
+        display: none !important;
+    }
+    .wrapper, .main, .content {
+        padding: 0 !important;
+        margin: 0 !important;
+        background: #white !important;
+    }
+    .card {
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+        margin-bottom: 20px !important;
+    }
+    body {
+        background-color: #fff !important;
+        color: #000 !important;
+    }
+    .card, table, tr {
+        page-break-inside: avoid;
+    }
+}
+</style>
+
+<!-- Print-Only Footer -->
+<div class="d-none d-print-block mt-5 pt-4">
+    <div class="row">
+        <div class="col-6">
+            <p class="small text-muted">Student Signature</p>
+            <br /><br /><br />
+            <p class="fw-bold mb-0">@Model.FullName</p>
+            <p class="text-xs text-muted">Date: @DateTime.Today.ToString("dd/MM/yyyy")</p>
+        </div>
+        <div class="col-6 text-end">
+            <p class="small text-muted">Academic Office Representative Signature</p>
+            <br /><br /><br />
+            <p class="fw-bold mb-0">FPT BTEC Registrar Office</p>
+            <p class="text-xs text-muted">BTEC FPT Seal</p>
+        </div>
+    </div>
+</div>

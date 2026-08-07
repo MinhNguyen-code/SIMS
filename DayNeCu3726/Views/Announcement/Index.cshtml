@@ -1,0 +1,89 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Announcements";
+    var userRole = Context.Session.GetString("UserRole") ?? "";
+    var canCreate = userRole == "Admin" || userRole == "Faculty";
+
+    // Mock data for UI demonstration
+    var announcements = new[]
+    {
+        new { Id = 1, Title = "Final Exam Schedule Released", Content = "The final exam schedule for Fall 2026 has been published. Please check your timetable.", Author = "Admin Office", Scope = "Global", Date = DateTime.Now.AddDays(-1), IsPinned = true },
+        new { Id = 2, Title = "Library Hours Extended", Content = "The main library will remain open until midnight during the exam preparation week.", Author = "Library Services", Scope = "Global", Date = DateTime.Now.AddDays(-3), IsPinned = false },
+        new { Id = 3, Title = "PROG102 - Extra Help Session", Content = "There will be an extra help session for PROG102 on Friday at 5 PM in Room 302.", Author = "John Doe (Faculty)", Scope = "Course: PROG102", Date = DateTime.Now.AddDays(-5), IsPinned = false }
+    };
+}
+
+<div class="row mb-4">
+    <div class="col-sm-8">
+        <h1 class="h3 mb-2 text-gray-800">Announcements</h1>
+        <p class="text-muted">Stay updated with the latest news and information.</p>
+    </div>
+    @if (canCreate)
+    {
+        <div class="col-sm-4 text-sm-end mt-3 mt-sm-0">
+            <a href="/Announcement/Create" class="btn btn-primary shadow-sm">
+                <i data-feather="plus" class="me-1"></i> Create new announcement
+            </a>
+        </div>
+    }
+</div>
+
+<div class="row">
+    <div class="col-12">
+        <div class="card shadow-sm border-0" style="border-radius: 12px;">
+            <div class="card-body p-0">
+                <div class="list-group list-group-flush" style="border-radius: 12px;">
+                    @if (Model != null)
+                    {
+                        // Render real model
+                    }
+
+                    @foreach (var ann in announcements.OrderByDescending(a => a.IsPinned).ThenByDescending(a => a.Date))
+                    {
+                        <div class="list-group-item p-4 hover-highlight">
+                            <div class="d-flex w-100 justify-content-between align-items-center mb-2">
+                                <h5 class="mb-1 fw-bold text-dark d-flex align-items-center">
+                                    @if (ann.IsPinned)
+                                    {
+                                        <span class="badge bg-danger me-2" title="Pinned"><i data-feather="paperclip" style="width: 12px; height: 12px;"></i> Pinned</span>
+                                    }
+                                    @ann.Title
+                                </h5>
+                                <small class="text-muted">@ann.Date.ToString("MMM dd, yyyy")</small>
+                            </div>
+                            <p class="mb-2 text-secondary">@ann.Content</p>
+                            <div class="d-flex align-items-center mt-3">
+                                <span class="badge bg-soft-primary text-primary me-2 px-2 py-1">@ann.Scope</span>
+                                <small class="text-muted"><i data-feather="user" style="width: 12px; height: 12px;" class="me-1"></i> @ann.Author</small>
+                            </div>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .bg-soft-primary {
+        background-color: rgba(20, 59, 107, 0.1);
+    }
+    .text-primary {
+        color: var(--sims-navy-700) !important;
+    }
+    .btn-primary {
+        background-color: var(--sims-navy-700);
+        border-color: var(--sims-navy-700);
+    }
+    .btn-primary:hover {
+        background-color: var(--sims-navy-800);
+        border-color: var(--sims-navy-800);
+    }
+    .hover-highlight {
+        transition: background-color 0.2s ease;
+    }
+    .hover-highlight:hover {
+        background-color: #f8f9fa;
+    }
+</style>

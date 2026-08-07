@@ -1,0 +1,243 @@
+@model DayNeCu3726.Models.ViewModels.SystemReportViewModel
+@{
+    ViewData["Title"] = "Reports & Analytics";
+
+    // Every figure below is bound from SystemReportViewModel.
+    // The previous version of this page displayed hard-coded placeholders
+    // ("1,245 students", "87.5%", "$1.2M", "42 warnings") while the controller was
+    // already passing a fully populated report model, so the screen contradicted
+    // the actual database contents.
+    var collectionRate = Model.TotalTuitionBilled > 0
+        ? (double)(Model.TotalTuitionCollected / Model.TotalTuitionBilled) * 100
+        : 0;
+    var debtRate = 100 - collectionRate;
+
+    string Vnd(decimal amount) => amount.ToString("N0") + " ₫";
+}
+
+<div class="sims-page-head">
+    <div>
+        <div class="sims-rule"></div>
+        <h1 class="sims-page-head__title">Reports &amp; Analytics</h1>
+        <p class="sims-page-head__sub">Live figures derived from the current database.</p>
+    </div>
+    <div class="sims-page-head__actions">
+        <a href="/Report/PassFailRate" class="btn btn-sm btn-outline-primary"><i data-feather="bar-chart-2"></i> Pass / Fail</a>
+        <a href="/Report/Attendance" class="btn btn-sm btn-outline-primary"><i data-feather="clock"></i> Attendance</a>
+        <a href="/Report/Finance" class="btn btn-sm btn-outline-primary"><i data-feather="pie-chart"></i> Finance</a>
+    </div>
+</div>
+
+<div class="sims-kpi-grid">
+    <article class="sims-kpi">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Total Students</span>
+            <span class="sims-kpi__icon"><i data-feather="users"></i></span>
+        </div>
+        <div class="sims-kpi__value">@Model.TotalStudents.ToString("N0")</div>
+        <div class="sims-kpi__foot">
+            <span class="sims-kpi__delta sims-kpi__delta--up">@Model.ActiveStudents active</span>
+            @if (Model.GraduatedStudents > 0)
+            {
+                <span> · @Model.GraduatedStudents graduated</span>
+            }
+        </div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--success">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Pass Rate</span>
+            <span class="sims-kpi__icon"><i data-feather="award"></i></span>
+        </div>
+        <div class="sims-kpi__value">@Model.OverallPassRate.ToString("F1")<span style="font-size:1.1rem;color:var(--sims-faint);">%</span></div>
+        <div class="sims-kpi__foot">Across @Model.TotalEnrollments.ToString("N0") enrollments</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--gold">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Tuition Collected</span>
+            <span class="sims-kpi__icon"><i data-feather="dollar-sign"></i></span>
+        </div>
+        <div class="sims-kpi__value" style="font-size:1.5rem;">@Vnd(Model.TotalTuitionCollected)</div>
+        <div class="sims-kpi__foot">@collectionRate.ToString("F1")% of @Vnd(Model.TotalTuitionBilled) billed</div>
+    </article>
+
+    <article class="sims-kpi @(Model.AttendanceWarnings.Any() ? "sims-kpi--danger" : "sims-kpi--info")">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Attendance Warnings</span>
+            <span class="sims-kpi__icon"><i data-feather="alert-triangle"></i></span>
+        </div>
+        <div class="sims-kpi__value">@Model.AttendanceWarnings.Count</div>
+        <div class="sims-kpi__foot">Students above the 6-absence limit</div>
+    </article>
+</div>
+
+<div class="row g-4">
+    <!-- ── Tuition collection ──────────────────────────────────────────── -->
+    <div class="col-12 col-xl-7">
+        <div class="card h-100">
+            <div class="card-header">
+                <div>
+                    <h2 class="card-title">Tuition Collection</h2>
+                    <p class="card-subtitle">Billed against collected for the current term</p>
+                </div>
+            </div>
+            <div class="card-body">
+                @if (Model.TotalTuitionBilled > 0)
+                {
+                    <div class="sims-stack">
+                        <div>
+                            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                <span style="font-weight:600;font-size:13.5px;">Collected</span>
+                                <span class="tabular" style="font-size:13px;color:var(--sims-success);font-weight:650;">
+                                    @Vnd(Model.TotalTuitionCollected) · @collectionRate.ToString("F1")%
+                                </span>
+                            </div>
+                            <div class="progress" role="progressbar" aria-label="Tuition collected"
+                                 aria-valuenow="@((int)collectionRate)" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar bg-success" style="width:@collectionRate.ToString("F1")%"></div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div class="d-flex justify-content-between align-items-baseline mb-2">
+                                <span style="font-weight:600;font-size:13.5px;">Outstanding debt</span>
+                                <span class="tabular" style="font-size:13px;color:var(--sims-danger);font-weight:650;">
+                                    @Vnd(Model.TotalTuitionDebt) · @debtRate.ToString("F1")%
+                                </span>
+                            </div>
+                            <div class="progress" role="progressbar" aria-label="Tuition outstanding"
+                                 aria-valuenow="@((int)debtRate)" aria-valuemin="0" aria-valuemax="100">
+                                <div class="progress-bar bg-danger" style="width:@debtRate.ToString("F1")%"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <dl class="row mt-4 mb-0">
+                        <dt class="col-6">Total billed</dt>
+                        <dd class="col-6 text-end tabular">@Vnd(Model.TotalTuitionBilled)</dd>
+                        <dt class="col-6">Total collected</dt>
+                        <dd class="col-6 text-end tabular text-success">@Vnd(Model.TotalTuitionCollected)</dd>
+                        <dt class="col-6">Remaining debt</dt>
+                        <dd class="col-6 text-end tabular text-danger">@Vnd(Model.TotalTuitionDebt)</dd>
+                    </dl>
+                }
+                else
+                {
+                    <div class="sims-empty">
+                        <div class="sims-empty__icon"><i data-feather="dollar-sign"></i></div>
+                        <div class="sims-empty__title">No tuition records</div>
+                        <p class="sims-empty__text">Figures will appear once tuition has been billed to students.</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- ── Detailed report links ───────────────────────────────────────── -->
+    <div class="col-12 col-xl-5">
+        <div class="card h-100">
+            <div class="card-header">
+                <h2 class="card-title">Detailed Reports</h2>
+            </div>
+            <div class="list-group list-group-flush">
+                <a href="/Report/PassFailRate" class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                   style="padding:15px 24px;border-color:var(--sims-line-soft);">
+                    <span class="sims-kpi__icon" style="width:34px;height:34px;"><i data-feather="bar-chart-2"></i></span>
+                    <span>
+                        <span class="d-block" style="font-weight:600;font-size:13.5px;">Pass / Fail Rate per Course</span>
+                        <span class="d-block text-muted" style="font-size:12px;">Outcome breakdown by unit</span>
+                    </span>
+                    <i data-feather="chevron-right" class="ms-auto" style="width:16px;height:16px;color:var(--sims-faint);"></i>
+                </a>
+
+                <a href="/Report/Attendance" class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                   style="padding:15px 24px;border-color:var(--sims-line-soft);">
+                    <span class="sims-kpi__icon" style="width:34px;height:34px;background:var(--sims-warning-bg);color:var(--sims-warning);"><i data-feather="clock"></i></span>
+                    <span>
+                        <span class="d-block" style="font-weight:600;font-size:13.5px;">Attendance Warnings</span>
+                        <span class="d-block text-muted" style="font-size:12px;">Students exceeding the absence limit</span>
+                    </span>
+                    <i data-feather="chevron-right" class="ms-auto" style="width:16px;height:16px;color:var(--sims-faint);"></i>
+                </a>
+
+                <a href="/Report/Finance" class="list-group-item list-group-item-action d-flex align-items-center gap-3"
+                   style="padding:15px 24px;border-color:var(--sims-line-soft);">
+                    <span class="sims-kpi__icon" style="width:34px;height:34px;background:var(--sims-success-bg);color:var(--sims-success);"><i data-feather="pie-chart"></i></span>
+                    <span>
+                        <span class="d-block" style="font-weight:600;font-size:13.5px;">Finance &amp; Tuition</span>
+                        <span class="d-block text-muted" style="font-size:12px;">Billing and collection detail</span>
+                    </span>
+                    <i data-feather="chevron-right" class="ms-auto" style="width:16px;height:16px;color:var(--sims-faint);"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ── Course outcomes ──────────────────────────────────────────────────── -->
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">Course Outcomes</h2>
+            <p class="card-subtitle">Pass rate for the five largest units</p>
+        </div>
+        <a href="/Report/PassFailRate" class="btn btn-sm btn-outline-primary">
+            Full report <i data-feather="arrow-right"></i>
+        </a>
+    </div>
+
+    @if (Model.CourseReports.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th scope="col">Course</th>
+                        <th scope="col" class="text-end">Enrolled</th>
+                        <th scope="col" class="text-end">Passed</th>
+                        <th scope="col" class="text-end">Failed</th>
+                        <th scope="col" style="width:190px;">Pass rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var c in Model.CourseReports)
+                {
+                    var rate = c.PassRate;
+                    var barClass = rate >= 80 ? "bg-success" : rate >= 50 ? "bg-warning" : "bg-danger";
+
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;">@c.CourseName</div>
+                            <div class="sims-mono" style="font-size:11.5px;color:var(--sims-muted);">@c.CourseCode</div>
+                        </td>
+                        <td class="text-end tabular">@c.TotalEnrolled</td>
+                        <td class="text-end tabular text-success">@c.PassedCount</td>
+                        <td class="text-end tabular @(c.FailedCount > 0 ? "text-danger" : "text-muted")">@c.FailedCount</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" role="progressbar"
+                                     aria-label="@c.CourseName pass rate"
+                                     aria-valuenow="@((int)rate)" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar @barClass" style="width:@Math.Max(rate, 2).ToString("F0")%"></div>
+                                </div>
+                                <span class="tabular" style="font-size:12px;font-weight:650;min-width:44px;text-align:right;">
+                                    @rate.ToString("F0")%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sims-empty">
+            <div class="sims-empty__icon"><i data-feather="bar-chart-2"></i></div>
+            <div class="sims-empty__title">No graded courses yet</div>
+            <p class="sims-empty__text">Outcomes appear once marks have been entered against enrollments.</p>
+        </div>
+    }
+</div>

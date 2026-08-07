@@ -1,0 +1,89 @@
+@{
+    ViewData["Title"] = "Child's Finance";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Tuition Details</h1>
+            <p class="text-muted mb-0">Student: Nguyen Minh Nhat (SE123456)</p>
+        </div>
+        <a href="/Parent/Dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="align-middle me-1" data-feather="arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Unpaid Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100 border-start border-4 border-danger">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="text-xs fw-bold text-danger text-uppercase mb-1">Remaining Balance</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">9,000,000 VND</div>
+                    </div>
+                    <div class="stat text-danger bg-light rounded p-3">
+                        <i class="align-middle" data-feather="alert-circle"></i>
+                    </div>
+                </div>
+                <p class="small text-muted mb-4">Due Date: Nov 30, 2023</p>
+                <button class="btn btn-danger btn-sm w-100 shadow-sm" onclick="alert('Redirecting to payment portal...')">Pay Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Paid Card -->
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm border-0 h-100 border-start border-4 border-success">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <div class="text-xs fw-bold text-success text-uppercase mb-1">Total Paid This Semester</div>
+                        <div class="h3 mb-0 fw-bold text-gray-800">9,000,000 VND</div>
+                    </div>
+                    <div class="stat text-success bg-light rounded p-3">
+                        <i class="align-middle" data-feather="check-circle"></i>
+                    </div>
+                </div>
+                <p class="small text-muted mb-4">Last payment: Sep 15, 2023 (TXN-98237192)</p>
+                <button class="btn btn-outline-success btn-sm w-100" disabled>Paid Successfully</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-header bg-white pt-4 pb-0 border-bottom-0">
+        <h5 class="fw-bold mb-0">Recent Transactions</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Date</th>
+                        <th>Transaction Code</th>
+                        <th>Description</th>
+                        <th class="text-end pe-3">Amount (VND)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-3">Sep 15, 2023</td>
+                        <td><span class="font-monospace text-muted">TXN-98237192</span></td>
+                        <td>First Installment - Fall 2023</td>
+                        <td class="text-end fw-bold text-success pe-3">+ 9,000,000</td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3">Jan 10, 2023</td>
+                        <td><span class="font-monospace text-muted">TXN-45928374</span></td>
+                        <td>Full Payment - Spring 2023</td>
+                        <td class="text-end fw-bold text-success pe-3">+ 18,000,000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,84 @@
+@{
+    ViewData["Title"] = "Request Details";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Request #REQ-1002</h1>
+            <p class="text-muted mb-0">Absence Request for Medical Reasons</p>
+        </div>
+        <a href="/ServiceRequest" class="btn btn-outline-secondary btn-sm">
+            <i class="align-middle me-1" data-feather="arrow-left"></i> Back to List
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm border-0 mb-4">
+            <div class="card-body">
+                <h5 class="card-title mb-4 border-bottom pb-2">Request Details</h5>
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Type</span>
+                    <span class="fw-bold">Leave</span>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Submitted On</span>
+                    <span>Oct 10, 2023 09:30 AM</span>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Description</span>
+                    <p class="bg-light p-3 rounded mt-1 mb-0">
+                        I am writing to request a leave of absence for the next 3 days due to illness. I have attached the medical certificate for your reference.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title mb-4 border-bottom pb-2">Admin Response</h5>
+                <div class="d-flex align-items-start">
+                    <div class="avatar-initials me-3 bg-secondary">AD</div>
+                    <div>
+                        <div class="mb-1">
+                            <strong>Admin Office</strong> <span class="text-muted small ms-2">Oct 11, 2023 14:15 PM</span>
+                        </div>
+                        <p class="mb-0">Your request has been approved. Please remember to catch up on the missed coursework. Get well soon!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="card-title mb-3">Status Timeline</h5>
+                <div class="timeline">
+                    <div class="timeline-item pb-3 border-start ms-2 ps-3 border-success position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-1 bg-success border border-light rounded-circle"></span>
+                        <div class="small fw-bold text-success mb-1">Approved</div>
+                        <div class="text-muted small">Oct 11, 2023 14:15 PM</div>
+                    </div>
+                    <div class="timeline-item pb-3 border-start ms-2 ps-3 border-warning position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-1 bg-warning border border-light rounded-circle"></span>
+                        <div class="small fw-bold text-warning mb-1">In Review</div>
+                        <div class="text-muted small">Oct 10, 2023 11:00 AM</div>
+                    </div>
+                    <div class="timeline-item ms-2 ps-3 position-relative">
+                        <span class="position-absolute top-0 start-0 translate-middle p-1 bg-secondary border border-light rounded-circle"></span>
+                        <div class="small fw-bold mb-1">Submitted</div>
+                        <div class="text-muted small">Oct 10, 2023 09:30 AM</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .timeline-item { position: relative; }
+    .timeline-item:last-child { border-left: none !important; margin-left: 0.5rem !important; ps-3: 1rem !important; }
+</style>

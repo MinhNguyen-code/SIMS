@@ -1,0 +1,92 @@
+@model DayNeCu3726.Models.ViewModels.CourseViewModel
+@{
+    ViewData["Title"] = "Course Details";
+    var role = Context.Session.GetString("UserRole") ?? "";
+    var userId = Context.Session.GetString("UserId") ?? "";
+    var pct = Model.MaxEnrollment > 0 ? (double)Model.CurrentEnrollment / Model.MaxEnrollment * 100 : 0;
+    var barClass = pct >= 90 ? "danger" : pct >= 70 ? "warning" : "success";
+    var statusClass = Model.Status.ToString() switch {
+        "Active" => "badge-success", "Completed" => "badge-accent",
+        "Cancelled" => "badge-danger", _ => "badge-neutral"
+    };
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><i data-feather="book-open" class="sims-h-ico"></i> @Model.CourseCode</h1>
+        <p class="page-subtitle">@Model.Name</p>
+    </div>
+    <div class="d-flex gap-8">
+        @if (role != "Student")
+        {
+            <a href="/Course/Edit/@Model.CourseId" class="btn btn-warning"><i data-feather="edit-2" class="sims-h-ico"></i> Edit</a>
+            <a href="/Enrollment/CourseRoster/@Model.CourseId" class="btn btn-secondary"><i data-feather="clipboard" class="sims-h-ico"></i> Roster</a>
+        }
+        @if (role == "Student")
+        {
+            <form asp-controller="Enrollment" asp-action="Enroll" method="post" style="display:inline;">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="courseId" value="@Model.CourseId" />
+                <button type="submit" class="btn btn-primary" @(!Model.HasCapacity ? "disabled" : "")>
+                    <i data-feather="edit-3" class="sims-h-ico"></i> Enroll
+                </button>
+            </form>
+        }
+        <a href="/Course" class="btn btn-secondary"><i data-feather="arrow-left" class="sims-h-ico"></i> Back</a>
+    </div>
+</div>
+
+<div style="display:grid; grid-template-columns:2fr 1fr; gap:20px;">
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Course Overview</span>
+                <span class="badge @statusClass">@Model.Status</span>
+            </div>
+            <div class="card-body">
+                <p class="text-muted" style="margin-bottom:20px; line-height:1.7;">@Model.Description</p>
+                <table class="sims-table">
+                    <tr><td class="fw-600 text-muted" style="width:35%;">Course Code</td>
+                        <td><span class="badge badge-neutral">@Model.CourseCode</span></td></tr>
+                    <tr><td class="fw-600 text-muted">Credits</td>
+                        <td><span class="badge badge-accent">@Model.Credits credits</span></td></tr>
+                    <tr><td class="fw-600 text-muted">Faculty</td>
+                        <td>@(string.IsNullOrEmpty(Model.FacultyName) ? "TBA" : Model.FacultyName)</td></tr>
+                    <tr><td class="fw-600 text-muted">Schedule</td>
+                        <td>@(string.IsNullOrEmpty(Model.Schedule) ? "—" : Model.Schedule)</td></tr>
+                    <tr><td class="fw-600 text-muted">Classroom</td>
+                        <td>@(string.IsNullOrEmpty(Model.Classroom) ? "—" : Model.Classroom)</td></tr>
+                    <tr><td class="fw-600 text-muted">Semester</td>
+                        <td>@Model.Semester</td></tr>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div>
+        <div class="card">
+            <div class="card-header"><span class="card-title"><i data-feather="bar-chart-2" class="sims-h-ico"></i> Enrollment</span></div>
+            <div class="card-body" style="text-align:center;">
+                <div style="font-size:36px; font-weight:800; color:var(--text-primary);">
+                    @Model.CurrentEnrollment
+                </div>
+                <div class="text-muted text-sm" style="margin-bottom:16px;">of @Model.MaxEnrollment students</div>
+                <div class="progress" style="height:10px; margin-bottom:8px;">
+                    <div class="progress-bar @barClass" style="width:@pct.ToString("F0")%"></div>
+                </div>
+                <div class="text-sm text-muted">@pct.ToString("F0")% capacity</div>
+                @if (!Model.HasCapacity)
+                {
+                    <div class="badge badge-danger" style="margin-top:12px; font-size:13px; padding:6px 16px;"> FULL
+                    </div>
+                }
+                else
+                {
+                    <div class="badge badge-success" style="margin-top:12px; font-size:13px; padding:6px 16px;">
+                        @(Model.MaxEnrollment - Model.CurrentEnrollment) spots left
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>

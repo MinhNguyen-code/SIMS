@@ -1,0 +1,131 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.CoursePassFailReportViewModel>
+@{
+    ViewData["Title"] = "Pass/Fail Rate per Course";
+
+    // Bound from the report service. The earlier version listed three invented
+    // courses (PRO1014 / WEB1013 / DB1013 with 150, 120 and 100 students) that do
+    // not exist in the database.
+    var reports = Model?.ToList() ?? new List<DayNeCu3726.Models.ViewModels.CoursePassFailReportViewModel>();
+
+    var totalEnrolled = reports.Sum(r => r.TotalEnrolled);
+    var totalPassed = reports.Sum(r => r.PassedCount);
+    var overallRate = totalEnrolled > 0 ? (double)totalPassed / totalEnrolled * 100 : 0;
+}
+
+<div class="sims-page-head">
+    <div>
+        <div class="sims-rule"></div>
+        <h1 class="sims-page-head__title">Pass / Fail Rate by Course</h1>
+        <p class="sims-page-head__sub">BTEC outcome distribution across every unit with recorded marks.</p>
+    </div>
+    <div class="sims-page-head__actions">
+        <a href="/Report" class="btn btn-sm btn-outline-secondary"><i data-feather="arrow-left"></i> Back to reports</a>
+    </div>
+</div>
+
+<div class="sims-kpi-grid">
+    <article class="sims-kpi">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Courses Reported</span>
+            <span class="sims-kpi__icon"><i data-feather="book-open"></i></span>
+        </div>
+        <div class="sims-kpi__value">@reports.Count</div>
+        <div class="sims-kpi__foot">With at least one enrolment</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--info">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Total Enrolled</span>
+            <span class="sims-kpi__icon"><i data-feather="users"></i></span>
+        </div>
+        <div class="sims-kpi__value">@totalEnrolled</div>
+        <div class="sims-kpi__foot">Across all reported units</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--success">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Overall Pass Rate</span>
+            <span class="sims-kpi__icon"><i data-feather="award"></i></span>
+        </div>
+        <div class="sims-kpi__value">@overallRate.ToString("F1")<span style="font-size:1.1rem;color:var(--sims-faint);">%</span></div>
+        <div class="sims-kpi__foot">@totalPassed of @totalEnrolled passed</div>
+    </article>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">Course Performance</h2>
+            <p class="card-subtitle">Distinction / Merit / Pass breakdown per unit</p>
+        </div>
+    </div>
+
+    @if (reports.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <caption class="px-4">Outcome counts and pass rate for each course with recorded marks</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Course</th>
+                        <th scope="col">Faculty</th>
+                        <th scope="col" class="text-end">Enrolled</th>
+                        <th scope="col" class="text-end">Distinction</th>
+                        <th scope="col" class="text-end">Merit</th>
+                        <th scope="col" class="text-end">Pass</th>
+                        <th scope="col" class="text-end">Fail</th>
+                        <th scope="col" style="width:170px;">Pass rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var r in reports)
+                {
+                    var rate = r.PassRate;
+                    var barClass = rate >= 80 ? "bg-success" : rate >= 50 ? "bg-warning" : "bg-danger";
+
+                    <tr>
+                        <td>
+                            <div style="font-weight:600;">@r.CourseName</div>
+                            <div class="sims-mono" style="font-size:11.5px;color:var(--sims-muted);">@r.CourseCode</div>
+                        </td>
+                        <td class="text-nowrap-md" style="font-size:13px;">@r.FacultyName</td>
+                        <td class="text-end tabular">@r.TotalEnrolled</td>
+                        <td class="text-end tabular">
+                            @if (r.DistinctionCount > 0) { <span class="badge bg-success">@r.DistinctionCount</span> } else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-end tabular">
+                            @if (r.MeritCount > 0) { <span class="badge bg-primary">@r.MeritCount</span> } else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-end tabular">
+                            @if (r.PassCount > 0) { <span class="badge bg-info">@r.PassCount</span> } else { <span class="text-muted">—</span> }
+                        </td>
+                        <td class="text-end tabular">
+                            @if (r.FailedCount > 0) { <span class="badge bg-danger">@r.FailedCount</span> } else { <span class="text-muted">—</span> }
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" role="progressbar"
+                                     aria-label="@r.CourseName pass rate"
+                                     aria-valuenow="@((int)rate)" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar @barClass" style="width:@Math.Max(rate, 2).ToString("F0")%"></div>
+                                </div>
+                                <span class="tabular" style="font-size:12px;font-weight:650;min-width:42px;text-align:right;">
+                                    @rate.ToString("F1")%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sims-empty">
+            <div class="sims-empty__icon"><i data-feather="bar-chart-2"></i></div>
+            <div class="sims-empty__title">No outcome data yet</div>
+            <p class="sims-empty__text">This report populates once tutors have entered marks against enrollments.</p>
+        </div>
+    }
+</div>

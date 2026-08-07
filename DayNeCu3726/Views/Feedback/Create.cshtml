@@ -1,0 +1,125 @@
+@{
+    ViewData["Title"] = "Evaluate Course";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Course Evaluation</h1>
+            <p class="text-muted mb-0">Database Systems - Prof. Tran Thi B</p>
+        </div>
+        <a href="/Feedback" class="btn btn-outline-secondary btn-sm">
+            <i class="align-middle me-1" data-feather="arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <form action="/Feedback/Create" method="post">
+            
+            <div class="mb-4">
+                <label class="form-label fw-bold d-block">1. Teaching Quality</label>
+                <div class="rating-stars text-warning fs-4" data-input="teachingQuality">
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                </div>
+                <input type="hidden" name="TeachingQuality" id="teachingQuality" value="0" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold d-block">2. Course Content & Materials</label>
+                <div class="rating-stars text-warning fs-4" data-input="courseContent">
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                </div>
+                <input type="hidden" name="CourseContent" id="courseContent" value="0" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold d-block">3. Overall Rating</label>
+                <div class="rating-stars text-warning fs-4" data-input="overallRating">
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                    <i class="far fa-star cursor-pointer"></i>
+                </div>
+                <input type="hidden" name="OverallRating" id="overallRating" value="0" required />
+            </div>
+
+            <div class="mb-4">
+                <label class="form-label fw-bold">Additional Comments (Optional)</label>
+                <textarea name="Comments" class="form-control" rows="4" placeholder="What did you like about the course? How could it be improved?"></textarea>
+            </div>
+
+            <div class="text-end">
+                <button type="submit" class="btn btn-primary shadow-sm px-4">Submit Evaluation</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const starGroups = document.querySelectorAll('.rating-stars');
+            
+            starGroups.forEach(group => {
+                const stars = group.querySelectorAll('i');
+                const inputId = group.getAttribute('data-input');
+                const input = document.getElementById(inputId);
+
+                stars.forEach((star, index) => {
+                    star.addEventListener('click', () => {
+                        input.value = index + 1;
+                        updateStars(stars, index);
+                    });
+
+                    star.addEventListener('mouseover', () => {
+                        highlightStars(stars, index);
+                    });
+                });
+
+                group.addEventListener('mouseleave', () => {
+                    const currentValue = parseInt(input.value) - 1;
+                    updateStars(stars, currentValue);
+                });
+            });
+
+            function highlightStars(stars, index) {
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            }
+
+            function updateStars(stars, index) {
+                stars.forEach((s, i) => {
+                    if (i <= index) {
+                        s.classList.remove('far');
+                        s.classList.add('fas');
+                    } else {
+                        s.classList.remove('fas');
+                        s.classList.add('far');
+                    }
+                });
+            }
+        });
+    </script>
+    <style>
+        .cursor-pointer { cursor: pointer; }
+    </style>
+}

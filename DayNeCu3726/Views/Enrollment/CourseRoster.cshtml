@@ -1,0 +1,252 @@
+@model DayNeCu3726.Models.ViewModels.CourseEnrollmentViewModel
+@{
+    ViewData["Title"] = "Course Roster";
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="clipboard" class="sims-h-ico"></i> Course Roster</h1>
+            <p class="text-muted mb-0">Manage grades and attendance for <strong>@Model.Course.CourseCode – @Model.Course.Name</strong></p>
+        </div>
+        <div>
+            @if (role == "Faculty" || role == "Admin")
+            {
+                <button type="button" class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#importModal">
+                    <i class="align-middle" data-feather="upload"></i> Import CSV
+                </button>
+                <form action="/Enrollment/FinalizeGrades" method="post" class="d-inline me-2" onsubmit="return confirm('Finalize grades: Students will no longer be able to modify grades, and students with more than 6 absences or grade < 5 will fail. Continue?');">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@Model.Course.CourseId" />
+                    <button type="submit" class="btn btn-warning">
+                        <i class="align-middle" data-feather="check-square"></i> Finalize Grades
+                    </button>
+                </form>
+            }
+            <a href="/Course" class="btn btn-outline-secondary">
+                <i class="align-middle" data-feather="arrow-left"></i> Back to Courses
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Roster Table -->
+    <div class="col-xl-9 col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Students List</h5>
+            </div>
+            <div class="card-body p-0">
+                @if (!Model.Enrollments.Any())
+                {
+                    <div class="text-center py-5">
+                        <i data-feather="users" style="width:48px;height:48px;" class="text-muted mb-3"></i>
+                        <p class="text-muted">No students enrolled in this course.</p>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover my-0">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Code</th>
+                                    <th>Absences</th>
+                                    <th>Eligibility</th>
+                                    <th>BTEC Grade</th>
+                                    <th>Status</th>
+                                    @if (role == "Faculty" || role == "Admin")
+                                    {
+                                        <th>Action</th>
+                                    }
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var e in Model.Enrollments)
+                            {
+                                var statusClass = e.Status.ToString() switch {
+                                    "Completed" => "bg-success",
+                                    "Enrolled" => "bg-primary",
+                                    "Failed" => "bg-danger",
+                                    _ => "bg-secondary"
+                                };
+
+                                var attendanceOk = e.Absences <= 6;
+                                var attendanceColor = attendanceOk ? "text-success" : "text-danger fw-bold";
+                                
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-initials me-2">@(e.StudentName.Length > 0 ? e.StudentName[0] : '?')</div>
+                                            <div>
+                                                <strong>@e.StudentName</strong>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td><span class="badge bg-light text-dark">@e.StudentCode</span></td>
+                                    <td class="text-sm">
+                                        <a href="/Enrollment/Attendance?enrollmentId=@e.EnrollmentId" class="@attendanceColor">
+                                            @e.Absences / @e.TotalSessions
+                                            <i class="align-middle ms-1" data-feather="edit-2" style="width:12px;height:12px;"></i>
+                                        </a>
+                                    </td>
+                                    <td>
+                                        @if (attendanceOk)
+                                        {
+                                            <span class="badge bg-success-light text-success">Eligible</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger-light text-danger">Exceeded limit (&gt;6)</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (e.Grade.HasValue || !string.IsNullOrEmpty(e.LetterGrade))
+                                        {
+                                            var letter = e.LetterGrade ?? "";
+                                            var badgeBg = letter switch {
+                                                "D" => "bg-success",
+                                                "M" => "bg-primary",
+                                                "P" => "bg-info",
+                                                _ => "bg-danger"
+                                            };
+                                            var desc = letter switch {
+                                                "D" => "Distinction",
+                                                "M" => "Merit",
+                                                "P" => "Pass",
+                                                _ => "Fail"
+                                            };
+                                            <span class="badge @badgeBg">@letter</span>
+                                            <small class="text-xs text-muted ms-1">(@desc)</small>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted small">Not Graded</span>
+                                        }
+                                    </td>
+                                    <td><span class="badge @statusClass">@(e.Status == DayNeCu3726.Models.Enums.EnrollmentStatus.Completed ? "Passed" : e.Status.ToString())</span></td>
+                                    @if (role == "Faculty" || role == "Admin")
+                                    {
+                                        <td>
+                                            <a href="/Enrollment/Grade/@e.EnrollmentId" class="btn btn-primary btn-sm">
+                                                <i class="align-middle" data-feather="edit-2" style="width:12px;height:12px;"></i> Grade / Attendance
+                                            </a>
+                                        </td>
+                                    }
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Sidebar -->
+    <div class="col-xl-3 col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Course Details</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Semester</span>
+                    <strong>@Model.Course.Semester</strong>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Schedule</span>
+                    <strong>@Model.Course.Schedule</strong>
+                </div>
+                <div class="mb-3">
+                    <span class="text-muted small d-block">Total Enrollment</span>
+                    <strong>@Model.Course.CurrentEnrollment</strong> of @Model.Course.MaxEnrollment students
+                </div>
+                <hr />
+                @{
+                    var total = Model.Enrollments.Count();
+                    var failedAttendance = Model.Enrollments.Count(e => e.Absences > 6);
+                    var passCount = Model.Enrollments.Count(e => e.LetterGrade == "P");
+                    var meritCount = Model.Enrollments.Count(e => e.LetterGrade == "M");
+                    var distinctionCount = Model.Enrollments.Count(e => e.LetterGrade == "D");
+                }
+                <div class="mb-2">
+                    <span class="text-muted small d-block">BTEC Achievements</span>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <span class="badge bg-success">D</span>
+                        <strong>@distinctionCount student(s)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <span class="badge bg-primary">M</span>
+                        <strong>@meritCount student(s)</strong>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center mt-1">
+                        <span class="badge bg-info">P</span>
+                        <strong>@passCount student(s)</strong>
+                    </div>
+                </div>
+                <hr />
+                <div class="mb-0">
+                    <span class="text-muted small d-block">Attendance Warning</span>
+                    <strong class="text-danger">@failedAttendance student(s)</strong> with &gt; 6 absences
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: #3b7ddd;
+    color: white;
+    font-size: 12px;
+    font-weight: 700;
+}
+.bg-success-light {
+    background-color: rgba(40, 167, 69, 0.15) !important;
+}
+.bg-danger-light {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+</style>
+
+<!-- Import Modal -->
+<div class="modal fade" id="importModal" tabindex="-1" aria-labelledby="importModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="importModalLabel">Import Grades (CSV)</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/Enrollment/ImportGrades" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <div class="modal-body">
+                    <input type="hidden" name="courseId" value="@Model.Course.CourseId" />
+                    
+                    <div class="mb-3">
+                        <label for="file" class="form-label">Select CSV File</label>
+                        <input type="file" class="form-control" id="file" name="file" accept=".csv" required />
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <strong>Format:</strong> <code>StudentCode,Grade,Absences,Remarks</code><br /> Example:<br />
+                        <code>BH00001,8.5,2,Good progress</code>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Upload & Import</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

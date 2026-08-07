@@ -1,0 +1,46 @@
+name: Build and Test
+
+# Runs the full automated test suite on every push and pull request.
+# Continuous integration is what turns a test suite into a safety net: a regression is caught
+# within minutes of being pushed rather than during marking or in production.
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up the .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore DayNeCu3726.slnx
+
+      - name: Build the solution
+        run: dotnet build DayNeCu3726.slnx --no-restore --configuration Release
+
+      - name: Run all tests with code coverage
+        run: >
+          dotnet test DayNeCu3726.slnx
+          --no-build
+          --configuration Release
+          --logger "trx;LogFileName=test-results.trx"
+          --collect:"XPlat Code Coverage"
+          --results-directory ./TestResults
+
+      - name: Publish the test results as a build artifact
+        uses: actions/upload-artifact@v4
+        if: always()      # Upload even when tests fail, so failures can be inspected.
+        with:
+          name: test-results
+          path: ./TestResults

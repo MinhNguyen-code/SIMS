@@ -1,0 +1,129 @@
+@{
+    ViewData["Title"] = "Manage Enrollments";
+    var course = ViewBag.Course as DayNeCu3726.Models.Entities.Course;
+    var enrollments = ViewBag.Enrollments as List<DayNeCu3726.Models.Entities.Enrollment>;
+    var availableStudents = ViewBag.AvailableStudents as List<DayNeCu3726.Models.Entities.Student>;
+}
+
+<div class="mb-3">
+    <a href="/Course/Index" class="text-decoration-none"><i data-feather="arrow-left"></i> Back to Courses</a>
+</div>
+
+<h1 class="h3 mb-3">Manage Enrollments: @course?.Name (@course?.CourseCode)</h1>
+
+<div class="row">
+    <!-- Enrolled Students -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Enrolled Students (@enrollments?.Count)</h5>
+            </div>
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Student Code</th>
+                            <th>Name</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (enrollments != null && enrollments.Any())
+                        {
+                            foreach (var e in enrollments)
+                            {
+                                <tr>
+                                    <td>@e.Student?.StudentCode</td>
+                                    <td>@e.Student?.FullName</td>
+                                    <td>
+                                        <span class="badge bg-success">@e.Status</span>
+                                    </td>
+                                    <td>
+                                        <form method="post" action="/Enrollment/Manage">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="courseId" value="@course?.CourseId" />
+                                            <input type="hidden" name="studentId" value="@e.StudentId" />
+                                            <input type="hidden" name="actionType" value="Drop" />
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="4" class="text-center text-muted py-4">No students enrolled yet.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assign Student -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Assign Student</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="/Enrollment/Manage">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="courseId" value="@course?.CourseId" />
+                    <input type="hidden" name="actionType" value="Enroll" />
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Select Student</label>
+                        <select name="studentId" class="form-select" required>
+                            <option value="">-- Select a student --</option>
+                            @if (availableStudents != null)
+                            {
+                                foreach (var s in availableStudents)
+                                {
+                                    <option value="@s.Id">@s.StudentCode - @s.FullName</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i data-feather="plus"></i> Add to Course
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <style>
+        .select2-container .select2-selection--single {
+            height: 38px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__rendered {
+            line-height: 36px;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('select[name="studentId"]').select2({
+                placeholder: "-- Select a student --",
+                allowClear: true,
+                width: '100%'
+            });
+        });
+    </script>
+}

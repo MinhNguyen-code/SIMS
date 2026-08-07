@@ -1,0 +1,92 @@
+@model DayNeCu3726.Models.ViewModels.CourseViewModel
+@{
+    ViewData["Title"] = "Edit Course";
+    var faculties = ViewBag.Faculties as IEnumerable<dynamic> ?? new List<dynamic>();
+}
+
+<div class="page-header">
+    <div>
+        <h1 class="page-title"><i data-feather="edit-2" class="sims-h-ico"></i> Edit Course</h1>
+        <p class="page-subtitle">@Model.CourseCode – @Model.Name</p>
+    </div>
+    <a href="/Course" class="btn btn-secondary"><i data-feather="arrow-left" class="sims-h-ico"></i> Back</a>
+</div>
+
+<div class="card" style="max-width:800px;">
+    <div class="card-header">
+        <span class="card-title">@Model.CourseCode</span>
+        <span class="badge badge-accent">@Model.Credits credits</span>
+    </div>
+    <div class="card-body">
+        <form asp-action="Edit" asp-route-id="@Model.CourseId" method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="CourseCode" />
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+            <div class="form-group">
+                <label class="form-label">Course Name *</label>
+                <input asp-for="Name" class="form-control" />
+                <span asp-validation-for="Name" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">Credits</label>
+                    <input asp-for="Credits" type="number" class="form-control" min="1" max="10" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Max Enrollment</label>
+                    <input asp-for="MaxEnrollment" type="number" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">Faculty</label>
+                    <select asp-for="FacultyId" class="form-control">
+                        <option value="">— None —</option>
+                        @foreach (var f in faculties)
+                        {
+                            <option value="@f.Id">@f.FullName</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select asp-for="Status" class="form-control">
+                        @foreach (var s in Enum.GetValues<DayNeCu3726.Models.Enums.CourseStatus>())
+                        {
+                            <option value="@((int)s)">@s</option>
+                        }
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">Schedule</label>
+                    <input asp-for="Schedule" class="form-control" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Classroom</label>
+                    <input asp-for="Classroom" class="form-control" />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Semester</label>
+                <input asp-for="Semester" class="form-control" />
+            </div>
+
+            <div class="d-flex gap-12" style="margin-top:8px;">
+                <button type="submit" class="btn btn-primary btn-lg"><i data-feather="save" class="sims-h-ico"></i> Save Changes</button>
+                <a href="/Course" class="btn btn-secondary btn-lg">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>

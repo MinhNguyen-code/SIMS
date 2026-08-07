@@ -1,0 +1,130 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.EnrollmentViewModel>
+@{
+    ViewData["Title"] = "My BTEC Courses";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0"><i data-feather="book" class="sims-h-ico"></i> My BTEC Enrolled Courses</h5>
+                <a href="/Enrollment/Browse" class="btn btn-sm btn-primary">
+                    <i class="align-middle" data-feather="search"></i> Browse Courses
+                </a>
+            </div>
+            
+            @if (!Model.Any())
+            {
+                <div class="card-body text-center py-5">
+                    <i data-feather="inbox" style="width:48px;height:48px;" class="text-muted mb-3"></i>
+                    <h3 class="text-muted">No Enrollments Yet</h3>
+                    <p class="text-muted">Start by browsing and enrolling in available courses.</p>
+                    <a href="/Enrollment/Browse" class="btn btn-primary">Browse Courses</a>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover my-0">
+                        <thead>
+                            <tr>
+                                <th>Course</th>
+                                <th>Faculty</th>
+                                <th>Schedule</th>
+                                <th>Absences</th>
+                                <th>Attendance Status</th>
+                                <th>BTEC Grade</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var e in Model)
+                        {
+                            var statusClass = e.Status.ToString() switch {
+                                "Completed" => "bg-success",
+                                "Enrolled" => "bg-primary",
+                                "Dropped" => "bg-secondary",
+                                "Failed" => "bg-danger",
+                                _ => "bg-secondary"
+                            };
+
+                            var attendanceOk = e.Absences <= 6;
+                            var attendanceClass = attendanceOk ? "text-success" : "text-danger fw-bold";
+                            
+                            <tr>
+                                <td>
+                                    <strong>@e.CourseCode</strong><br/>
+                                    <small class="text-muted">@e.CourseName</small><br/>
+                                    <small class="badge bg-light text-dark">@e.Credits credits</small>
+                                </td>
+                                <td>@e.FacultyName</td>
+                                <td>@e.Schedule</td>
+                                <td class="text-sm">
+                                    <a href="/Enrollment/Attendance?enrollmentId=@e.EnrollmentId" class="@attendanceClass">
+                                        @e.Absences / @e.TotalSessions
+                                        <i class="align-middle ms-1" data-feather="eye" style="width:12px;height:12px;"></i>
+                                    </a>
+                                </td>
+                                <td>
+                                    @if (attendanceOk)
+                                    {
+                                        <span class="badge bg-success-light text-success">
+                                            <i class="align-middle" data-feather="check" style="width:12px;height:12px;"></i> Eligible
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger-light text-danger">
+                                            <i class="align-middle" data-feather="x" style="width:12px;height:12px;"></i> Failed Attendance
+                                        </span>
+                                    }
+                                </td>
+                                <td>
+                                    @if (e.Grade.HasValue || !string.IsNullOrEmpty(e.LetterGrade))
+                                    {
+                                        var letter = e.LetterGrade ?? "";
+                                        var badgeBg = letter switch {
+                                            "D" => "bg-success",   // Distinction
+                                            "M" => "bg-primary",   // Merit
+                                            "P" => "bg-info",      // Pass
+                                            _ => "bg-danger"       // Fail
+                                        };
+                                        var desc = letter switch {
+                                            "D" => "Distinction",
+                                            "M" => "Merit",
+                                            "P" => "Pass",
+                                            _ => "Fail"
+                                        };
+                                        <span class="badge @badgeBg p-2" style="font-size: 13px;">@letter</span>
+                                        <span class="text-xs text-muted ms-1">(@desc)</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">Pending</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="badge @statusClass">@(e.Status == DayNeCu3726.Models.Enums.EnrollmentStatus.Completed ? "Passed" : e.Status.ToString())</span>
+                                </td>
+                                <td>
+                                    @if (e.Status == DayNeCu3726.Models.Enums.EnrollmentStatus.Enrolled)
+                                    {
+                                        <form asp-controller="Enrollment" asp-action="Drop" method="post" style="display:inline;">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="courseId" value="@e.CourseId" />
+                                            <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                    onclick="return confirm('Are you sure you want to drop @e.CourseCode?')"> Drop
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>

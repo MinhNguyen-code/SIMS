@@ -1,0 +1,46 @@
+@model DayNeCu3726.Models.ViewModels.CreateAssignmentViewModel
+@{
+    ViewData["Title"] = "Create Assignment";
+    var courses = ViewBag.Courses as IEnumerable<DayNeCu3726.Models.Entities.Course>;
+}
+
+<h1 class="h3 mb-3">Create Assignment</h1>
+
+<div class="card">
+    <div class="card-body">
+        <form method="post" action="/Assignment/Create">
+            @Html.AntiForgeryToken()
+            <div class="mb-3">
+                <label class="form-label">Course</label>
+                <select name="CourseId" class="form-select" required>
+                    <option value="">-- Select Course --</option>
+                    @if (courses != null)
+                    {
+                        foreach (var c in courses)
+                        {
+                            <option value="@c.CourseId">@c.CourseCode - @c.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Title</label>
+                <input type="text" name="Title" class="form-control" value="@Model.Title" required />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea name="Description" class="form-control" rows="4" required>@Model.Description</textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Deadline (UTC)</label>
+                <input type="datetime-local" name="Deadline" class="form-control" value="@Model.Deadline.ToString("yyyy-MM-ddTHH:mm")" required />
+            </div>
+
+            <button type="submit" class="btn btn-primary">Create Assignment</button>
+            <a href="/Assignment/Index" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,265 @@
+@model DayNeCu3726.Models.ViewModels.EnrollmentViewModel
+@{
+    ViewData["Title"] = "Attendance Sheet";
+    var role = Context.Session.GetString("UserRole") ?? "";
+    var isFaculty = role == "Faculty" || role == "Admin";
+    
+    // Convert attendance pattern into char array for easier manipulation
+    var pattern = Model.AttendancePattern.PadRight(30, '_').ToCharArray();
+    var absencesCount = pattern.Count(c => c == 'A');
+    var presentCount = pattern.Count(c => c == 'P');
+    var totalTaken = presentCount + absencesCount;
+    var attendanceRate = totalTaken > 0 ? (double)presentCount / totalTaken * 100 : 100;
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="edit-3" class="sims-h-ico"></i> BTEC Attendance Report</h1>
+            <p class="text-muted mb-0">Detailed session-by-session logs for <strong>@Model.CourseCode – @Model.CourseName</strong></p>
+        </div>
+        <a href="javascript:history.back()" class="btn btn-outline-secondary">
+            <i class="align-middle" data-feather="arrow-left"></i> Back
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Summary Cards -->
+    <div class="col-xl-4 col-md-5">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Student Profile</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="avatar-initials me-2 bg-primary">@Model.StudentName[0]</div>
+                    <div>
+                        <h4 class="mb-0">@Model.StudentName</h4>
+                        <span class="badge bg-light text-dark">@Model.StudentCode</span>
+                    </div>
+                </div>
+                <hr/>
+                <div class="mb-2">
+                    <span class="text-muted small d-block">Course Faculty</span>
+                    <strong>@Model.FacultyName</strong>
+                </div>
+                <div class="mb-2">
+                    <span class="text-muted small d-block">Schedule</span>
+                    <strong>@Model.Schedule</strong>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">BTEC Attendance Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3 text-center">
+                    <span class="text-muted small d-block mb-1">Absences Count</span>
+                    <h1 class="display-4 fw-bold @(absencesCount > 6 ? "text-danger" : "text-success")">@absencesCount / 6</h1>
+                    <span class="text-xs text-muted">Max allowed absences: 6 out of 30 sessions</span>
+                </div>
+                
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="text-muted small">Attendance Rate</span>
+                        <span class="fw-bold text-sm">@attendanceRate.ToString("F0")%</span>
+                    </div>
+                    <div class="progress" style="height: 6px;">
+                        <div class="progress-bar @(absencesCount > 6 ? "bg-danger" : "bg-success")" style="width: @attendanceRate.ToString("F0")%"></div>
+                    </div>
+                </div>
+
+                @if (absencesCount > 6)
+                {
+                    <div class="alert alert-danger mb-0" role="alert">
+                        <div class="alert-message">
+                            <strong><i data-feather="slash" class="sims-h-ico"></i> Attendance Failed</strong><br/> Student exceeded 6 absences limit and failed this course.
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-success mb-0" role="alert">
+                        <div class="alert-message">
+                            <strong><i data-feather="check-circle" class="sims-h-ico"></i> Status Eligible</strong><br/> Student is eligible to continue and sit the exams.
+                        </div>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Grid -->
+    <div class="col-xl-8 col-md-7">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="card-title mb-0">30 Sessions Log</h5>
+                @if (isFaculty)
+                {
+                    <span class="badge bg-warning-light text-warning fw-bold">Faculty Mode: Click box to toggle</span>
+                }
+            </div>
+            <div class="card-body">
+                <form id="attendanceForm" asp-action="TakeAttendance" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="enrollmentId" value="@Model.EnrollmentId" />
+                    <input type="hidden" id="patternInput" name="pattern" value="@Model.AttendancePattern" />
+
+                    <!-- Legends -->
+                    <div class="d-flex gap-3 mb-4 text-sm justify-content-center">
+                        <div class="d-flex align-items-center">
+                            <span class="square-legend bg-success me-1"></span> Present (P)
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="square-legend bg-danger me-1"></span> Absent (A)
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <span class="square-legend bg-secondary-opacity me-1"></span> Future (_)
+                        </div>
+                    </div>
+
+                    <!-- Grid -->
+                    <div class="attendance-grid mb-4">
+                        @for (int i = 0; i < 30; i++)
+                        {
+                            var state = pattern[i];
+                            var cellBg = state switch {
+                                'P' => "bg-success text-white",
+                                'A' => "bg-danger text-white",
+                                _ => "bg-light-opacity text-muted border"
+                            };
+                            
+                            <div class="grid-box @cellBg" data-index="@i" style="@(isFaculty ? "cursor: pointer;" : "")">
+                                <div class="box-num">@(i + 1)</div>
+                                <div class="box-state">@state</div>
+                            </div>
+                        }
+                    </div>
+
+                    @if (isFaculty)
+                    {
+                        <div class="text-end">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="align-middle" data-feather="save"></i> Save Attendance Pattern
+                            </button>
+                        </div>
+                    }
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    color: white;
+    font-size: 16px;
+    font-weight: 700;
+}
+.square-legend {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+}
+.bg-secondary-opacity {
+    background-color: rgba(0, 0, 0, 0.05);
+    border: 1px solid #cbd5e1;
+}
+.bg-light-opacity {
+    background-color: rgba(0, 0, 0, 0.03);
+}
+.attendance-grid {
+    display: grid;
+    grid-template-columns: repeat(10, 1fr);
+    gap: 8px;
+}
+@@media (max-width: 768px) {
+    .attendance-grid {
+        grid-template-columns: repeat(5, 1fr);
+    }
+}
+.grid-box {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    border-radius: 6px;
+    transition: transform 0.15s ease-in-out;
+}
+.grid-box:hover {
+    transform: translateY(-2px);
+}
+.box-num {
+    font-size: 11px;
+    opacity: 0.8;
+}
+.box-state {
+    font-size: 18px;
+    font-weight: 800;
+}
+.bg-warning-light {
+    background-color: rgba(252, 185, 44, 0.15) !important;
+}
+</style>
+
+@if (isFaculty)
+{
+@section Scripts {
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const boxes = document.querySelectorAll(".grid-box");
+    const patternInput = document.getElementById("patternInput");
+    
+    // Parse pattern string into array
+    let pattern = patternInput.value.padEnd(30, '_').split('');
+    
+    boxes.forEach(box => {
+        box.addEventListener("click", function() {
+            const index = parseInt(this.getAttribute("data-index"));
+            
+            // Toggle cycle: P -> A -> _ -> P
+            let currentState = pattern[index];
+            let nextState = '_';
+            
+            if (currentState === '_') {
+                nextState = 'P';
+            } else if (currentState === 'P') {
+                nextState = 'A';
+            } else if (currentState === 'A') {
+                nextState = '_';
+            }
+            
+            // Update array
+            pattern[index] = nextState;
+            
+            // Update UI class and text
+            this.className = "grid-box ";
+            this.querySelector(".box-state").textContent = nextState;
+            
+            if (nextState === 'P') {
+                this.classList.add("bg-success", "text-white");
+            } else if (nextState === 'A') {
+                this.classList.add("bg-danger", "text-white");
+            } else {
+                this.classList.add("bg-light-opacity", "text-muted", "border");
+            }
+            
+            // Update input field
+            patternInput.value = pattern.join('');
+        });
+    });
+});
+</script>
+}
+}

@@ -1,0 +1,159 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.CourseEnrollmentViewModel>
+@{
+    ViewData["Title"] = "Browse Courses";
+    var role = Context.Session.GetString("UserRole") ?? "";
+    
+    string GetTermLabel(string semester)
+    {
+        return semester switch {
+            "Spring 2025" => "Term 1",
+            "Summer 2025" => "Term 2",
+            "Fall 2025" => "Term 3",
+            "Spring 2026" => "Term 4",
+            "Summer 2026" => "Term 5",
+            "Fall 2026" => "Term 6",
+            _ => semester
+        };
+    }
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="search" class="sims-h-ico"></i> BTEC Curriculum Directory</h1>
+            <p class="text-muted mb-0">Browse and enroll in available modules (@Model.Count() courses)</p>
+        </div>
+        <a href="/Enrollment/MyEnrollments" class="btn btn-outline-secondary">
+            <i class="align-middle" data-feather="book"></i> My Courses
+        </a>
+    </div>
+</div>
+
+@if (!Model.Any())
+{
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm text-center py-5">
+                <div class="card-body">
+                    <i data-feather="search" style="width: 48px; height: 48px;" class="text-muted mb-3"></i>
+                    <p class="text-muted mb-0">No active courses available at this time.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            var c = item.Course;
+            var pct = c.MaxEnrollment > 0 ? (double)c.CurrentEnrollment / c.MaxEnrollment * 100 : 0;
+            var barColor = pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "bg-success";
+            var termName = GetTermLabel(c.Semester);
+
+            <div class="col-md-6 col-xl-4 mb-4 d-flex">
+                <div class="card border-0 shadow-sm w-100 d-flex flex-column justify-content-between" style="transition: transform 0.15s ease; cursor: default;">
+                    <div>
+                        <div class="card-header bg-light-opacity border-bottom d-flex justify-content-between align-items-center py-3">
+                            <div>
+                                <span class="badge bg-light text-dark border fw-bold me-1">@c.CourseCode</span>
+                                <span class="badge bg-warning-light text-warning fw-bold">@termName</span>
+                            </div>
+                            @if (item.IsAlreadyEnrolled)
+                            {
+                                <span class="badge bg-success-light text-success fw-bold">Enrolled <i data-feather="check" class="sims-h-ico"></i></span>
+                            }
+                            else if (c.CurrentEnrollment >= c.MaxEnrollment)
+                            {
+                                <span class="badge bg-danger-light text-danger fw-bold">Full</span>
+                            }
+                        </div>
+                        
+                        <div class="card-body py-3">
+                            <h4 class="card-title fw-bold mb-2 text-dark" style="font-size: 15px; line-height: 1.4;">@c.Name</h4>
+                            <p class="card-text text-sm text-muted mb-3" style="line-height: 1.5; min-height: 45px;">
+                                @(c.Description?.Length > 100 ? c.Description.Substring(0, 100) + "…" : c.Description)
+                            </p>
+                            
+                            <hr class="my-2" style="opacity: 0.08;" />
+                            
+                            <div class="row g-2 text-xs text-muted mb-3">
+                                <div class="col-6">
+                                    <i class="align-middle me-1 text-secondary" data-feather="user" style="width:12px;height:12px;"></i> @c.FacultyName
+                                </div>
+                                <div class="col-6">
+                                    <i class="align-middle me-1 text-secondary" data-feather="map-pin" style="width:12px;height:12px;"></i> Room: @c.Classroom
+                                </div>
+                                <div class="col-12 mt-2">
+                                    <i class="align-middle me-1 text-secondary" data-feather="calendar" style="width:12px;height:12px;"></i> @c.Schedule
+                                </div>
+                            </div>
+                            
+                            <hr class="my-2" style="opacity: 0.08;" />
+                            
+                            <div class="mb-2">
+                                <div class="d-flex justify-content-between text-xs text-muted mb-1">
+                                    <span>Class Capacity</span>
+                                    <span>@c.CurrentEnrollment / @c.MaxEnrollment</span>
+                                </div>
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar @barColor" role="progressbar" style="width: @pct.ToString("F0")%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card-footer bg-transparent border-top py-3 px-4 d-flex justify-content-between align-items-center">
+                        <a href="/Course/Details/@c.CourseId" class="btn btn-sm btn-outline-secondary">
+                            <i class="align-middle me-1" data-feather="eye" style="width: 14px; height: 14px;"></i> Details
+                        </a>
+                        
+                        @if (role == "Student")
+                        {
+                            if (item.IsAlreadyEnrolled)
+                            {
+                                <button class="btn btn-sm btn-success" disabled>
+                                    <i class="align-middle me-1" data-feather="check" style="width: 14px; height: 14px;"></i> Enrolled
+                                </button>
+                            }
+                            else if (c.CurrentEnrollment >= c.MaxEnrollment)
+                            {
+                                <button class="btn btn-sm btn-secondary" disabled>Class Full</button>
+                            }
+                            else
+                            {
+                                <form asp-controller="Enrollment" asp-action="Enroll" method="post" style="margin: 0;">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="courseId" value="@c.CourseId" />
+                                    <button type="submit" class="btn btn-sm btn-primary">
+                                        <i class="align-middle me-1" data-feather="plus-circle" style="width: 14px; height: 14px;"></i> Register
+                                    </button>
+                                </form>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+<style>
+.bg-light-opacity {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+.bg-warning-light {
+    background-color: rgba(252, 185, 44, 0.15) !important;
+}
+.bg-success-light {
+    background-color: rgba(40, 167, 69, 0.15) !important;
+}
+.bg-danger-light {
+    background-color: rgba(220, 53, 69, 0.15) !important;
+}
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.08) !important;
+}
+</style>

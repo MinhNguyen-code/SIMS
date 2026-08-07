@@ -1,0 +1,80 @@
+@model DayNeCu3726.Models.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="auth-page">
+    <div class="auth-card" style="width:480px;">
+        <div class="auth-header">
+            <div class="auth-logo"><i data-feather="edit-3" class="sims-h-ico"></i></div>
+            <h1 class="auth-title">Create Account</h1>
+            <p class="auth-subtitle">Join the SIMS university portal</p>
+        </div>
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div class="alert alert-danger">
+                <span><i data-feather="x-circle" class="sims-h-ico"></i></span>
+                <div asp-validation-summary="ModelOnly"></div>
+            </div>
+        }
+
+        <form asp-action="Register" method="post">
+            @Html.AntiForgeryToken()
+
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input asp-for="FullName" class="form-control" placeholder="Nguyen Van A" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input asp-for="Email" class="form-control" placeholder="your@email.edu" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" placeholder="Min. 6 characters" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control" placeholder="Repeat password" />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <select asp-for="Role" class="form-control">
+                    <option value="2"><i data-feather="award" class="sims-h-ico"></i> Student</option>
+                    <option value="1">‍<i data-feather="home" class="sims-h-ico"></i> Faculty</option>
+                    <option value="0"><i data-feather="award" class="sims-h-ico"></i> Admin</option>
+                </select>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">Program (optional)</label>
+                    <input asp-for="Program" class="form-control" placeholder="Computer Science" />
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Department (optional)</label>
+                    <input asp-for="Department" class="form-control" placeholder="CS Department" />
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+                <i data-feather="zap" class="sims-h-ico"></i> Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-muted text-sm mt-16"> Already have an account?
+            <a asp-action="Login" class="text-accent">Sign in</a>
+        </p>
+    </div>
+</div>

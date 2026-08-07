@@ -1,0 +1,148 @@
+@model DayNeCu3726.Models.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Sign In";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*
+    Split-screen sign-in.
+    Left: a navy brand panel that establishes the institutional identity before
+    the user has any data on screen. Right: the form on a calm neutral surface,
+    so the eye lands on the single task the page asks for.
+*@
+<div class="sims-auth">
+
+    <!--  Brand panel  -->
+    <section class="sims-auth__brand">
+        <div class="sims-auth__logo">
+            <span class="sims-auth__logo-mark" aria-hidden="true">S</span>
+            <span>
+                <span class="sims-auth__logo-text d-block">SIMS</span>
+                <span class="sims-auth__logo-sub">Student Information</span>
+            </span>
+        </div>
+
+        <div>
+            <h1 class="sims-auth__headline">Academic administration, unified.</h1>
+            <p class="sims-auth__lede"> A single system for student registration, course management and academic
+                records — built on SOLID design principles with role-based access control
+                and large-dataset processing.
+            </p>
+
+            <div class="sims-auth__features">
+                <div class="sims-auth__feature">
+                    <span class="sims-auth__feature-dot" aria-hidden="true"><i data-feather="check"></i></span>
+                    <span>Role-based access for administrators, faculty, students and parents</span>
+                </div>
+                <div class="sims-auth__feature">
+                    <span class="sims-auth__feature-dot" aria-hidden="true"><i data-feather="check"></i></span>
+                    <span>Streaming CSV import and export for datasets of any size</span>
+                </div>
+                <div class="sims-auth__feature">
+                    <span class="sims-auth__feature-dot" aria-hidden="true"><i data-feather="check"></i></span>
+                    <span>PBKDF2 credential hashing with a unique salt for every account</span>
+                </div>
+            </div>
+        </div>
+
+        <p class="sims-auth__foot mb-0"> Unit 20 — Applied Programming and Design Principles &nbsp;·&nbsp; Pearson BTEC Level 5 HND Computing
+        </p>
+    </section>
+
+    <!--  Form panel  -->
+    <section class="sims-auth__panel">
+        <div class="sims-auth__form">
+
+            <h2 class="sims-auth__title">Welcome back</h2>
+            <p class="sims-auth__subtitle">Sign in to continue to your dashboard.</p>
+
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i data-feather="alert-circle" class="me-2 flex-shrink-0" style="width:17px;height:17px;"></i>
+                    <span>@TempData["Error"]</span>
+                </div>
+            }
+
+            <form asp-action="Login" method="post" id="loginForm" novalidate>
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label">Email address</label>
+                    <input asp-for="Email" class="form-control form-control-lg" type="email"
+                           placeholder="you@sims.edu" autocomplete="email" autofocus
+                           aria-describedby="emailError" />
+                    <span asp-validation-for="Email" id="emailError" class="text-danger" style="font-size:12px;"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <div style="position:relative;">
+                        @* The id is left to asp-for so it stays "Password" and matches the
+                           label, the validation span and the demo-account script. *@
+                        <input asp-for="Password" type="password" class="form-control form-control-lg"
+                               placeholder="Enter your password" autocomplete="current-password"
+                               aria-describedby="passwordError" />
+                        <button type="button" id="togglePassword"
+                                aria-label="Show password"
+                                style="position:absolute;right:6px;top:50%;transform:translateY(-50%);
+                                       background:none;border:0;padding:8px;cursor:pointer;
+                                       color:var(--sims-faint);display:grid;place-items:center;">
+                            <i data-feather="eye" style="width:16px;height:16px;"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" id="passwordError" class="text-danger" style="font-size:12px;"></span>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg w-100" id="loginBtn">
+                    <span id="loginBtnText">Sign in</span>
+                    <i data-feather="arrow-right" style="width:16px;height:16px;"></i>
+                </button>
+
+                <div class="mt-3 text-center">
+                    <a asp-action="ForgotPassword" class="text-decoration-none" style="font-size:13px; font-weight: 500;">Forgot your password?</a>
+                </div>
+            </form>
+
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script> function fillLogin(email, password) {
+            document.getElementById('Email').value = email;
+            document.getElementById('Password').value = password;
+            document.getElementById('Email').focus();
+        }
+
+        // Show/hide the password so users can confirm what they typed
+        (function () {
+            var toggle = document.getElementById('togglePassword');
+            var field  = document.getElementById('Password');
+            if (!toggle || !field) return;
+
+            toggle.addEventListener('click', function () {
+                var isHidden = field.type === 'password';
+                field.type = isHidden ? 'text' : 'password';
+                toggle.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+                toggle.innerHTML = '<i data-feather="' + (isHidden ? 'eye-off' : 'eye') + '" style="width:16px;height:16px;"></i>';
+                if (window.feather) window.feather.replace();
+            });
+        })();
+
+        // Disable the button on submit to prevent a duplicate login request
+        (function () {
+            var form = document.getElementById('loginForm');
+            if (!form) return;
+
+            form.addEventListener('submit', function () {
+                var btn = document.getElementById('loginBtn');
+                var txt = document.getElementById('loginBtnText');
+                if (btn && txt) { btn.disabled = true; txt.textContent = 'Signing in…'; }
+            });
+        })();
+    </script>
+}

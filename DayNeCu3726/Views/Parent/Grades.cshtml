@@ -1,0 +1,63 @@
+@{
+    ViewData["Title"] = "Child's Grades";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Academic Transcript</h1>
+            <p class="text-muted mb-0">Student: Nguyen Minh Nhat (SE123456)</p>
+        </div>
+        <a href="/Parent/Dashboard" class="btn btn-outline-secondary btn-sm">
+            <i class="align-middle me-1" data-feather="arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-lg">
+    <div class="card-header bg-white pt-4 pb-0 border-bottom-0">
+        <h5 class="fw-bold mb-0">Fall 2023 - Term Results</h5>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Course Code</th>
+                        <th>Course Name</th>
+                        <th class="text-center">Credits</th>
+                        <th class="text-center">Score (10)</th>
+                        <th class="text-center">BTEC Grade</th>
+                        <th class="text-center pe-3">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="ps-3 text-muted">PROG201</td>
+                        <td class="fw-bold">Advanced Programming (C#)</td>
+                        <td class="text-center">3</td>
+                        <td class="text-center fw-bold">9.5</td>
+                        <td class="text-center"><span class="badge bg-primary">Distinction</span></td>
+                        <td class="text-center pe-3"><span class="badge bg-success">Passed</span></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 text-muted">DB101</td>
+                        <td class="fw-bold">Database Systems</td>
+                        <td class="text-center">3</td>
+                        <td class="text-center fw-bold">7.5</td>
+                        <td class="text-center"><span class="badge bg-info text-dark">Merit</span></td>
+                        <td class="text-center pe-3"><span class="badge bg-success">Passed</span></td>
+                    </tr>
+                    <tr>
+                        <td class="ps-3 text-muted">WEB301</td>
+                        <td class="fw-bold">Web Development</td>
+                        <td class="text-center">3</td>
+                        <td class="text-center fw-bold">6.0</td>
+                        <td class="text-center"><span class="badge bg-secondary">Pass</span></td>
+                        <td class="text-center pe-3"><span class="badge bg-success">Passed</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

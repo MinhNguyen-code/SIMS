@@ -1,0 +1,110 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.AssignmentViewModel>
+@{
+    ViewData["Title"] = "Assignments";
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="row mb-3 align-items-center">
+    <div class="col-auto">
+        <h1 class="h3 mb-0">Assignments</h1>
+    </div>
+    @if (role == "Admin")
+    {
+        <div class="col-auto ms-auto">
+            <a href="/Assignment/Create" class="btn btn-primary">
+                <i data-feather="plus"></i> Create Assignment
+            </a>
+        </div>
+    }
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Course</th>
+                    <th>Deadline</th>
+                    @if (role == "Faculty" || role == "Admin")
+                    {
+                        <th>Submissions</th>
+                        <th>Graded</th>
+                    }
+                    else if (role == "Student")
+                    {
+                        <th>Status</th>
+                        <th>Grade</th>
+                    }
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td><strong>@item.Title</strong></td>
+                        <td>@item.CourseName</td>
+                        <td>
+                            <span class="@(item.Deadline < DateTime.UtcNow ? "text-danger" : "")">
+                                @item.Deadline.ToLocalTime().ToString("g")
+                            </span>
+                        </td>
+                        @if (role == "Faculty" || role == "Admin")
+                        {
+                            <td>@item.SubmissionCount</td>
+                            <td>@item.GradedCount / @item.SubmissionCount</td>
+                        }
+                        else if (role == "Student")
+                        {
+                            <td>
+                                @if (item.HasSubmitted)
+                                {
+                                    <span class="badge bg-success">Submitted</span>
+                                }
+                                else if (item.Deadline < DateTime.UtcNow)
+                                {
+                                    <span class="badge bg-danger">Missing</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-warning text-dark">Pending</span>
+                                }
+                            </td>
+                            <td>
+                                @if (item.MyGrade.HasValue)
+                                {
+                                    <strong>@item.MyGrade.Value.ToString("0.0")</strong>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">-</span>
+                                }
+                            </td>
+                        }
+                        <td>
+                            @if (role == "Student")
+                            {
+                                <a href="/Assignment/Submit/@item.AssignmentId" class="btn btn-sm btn-outline-primary">
+                                    @(item.HasSubmitted ? "Update Submission" : "Submit")
+                                </a>
+                            }
+                            else if (role == "Faculty" || role == "Admin")
+                            {
+                                <a href="/Assignment/Submissions/@item.AssignmentId" class="btn btn-sm btn-outline-primary">
+                                    View Submissions
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No assignments found.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

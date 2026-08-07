@@ -1,0 +1,122 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.AttendanceWarningReportViewModel>
+@{
+    ViewData["Title"] = "Attendance Warnings";
+
+    // Bound from the report service. The earlier version listed two invented students
+    // (BH003 "Le Van C" and BH042 "Ngo Thi D") that are not in the database.
+    var warnings = Model?.ToList() ?? new List<DayNeCu3726.Models.ViewModels.AttendanceWarningReportViewModel>();
+
+    const int AbsenceLimit = 6;
+}
+
+<div class="sims-page-head">
+    <div>
+        <div class="sims-rule"></div>
+        <h1 class="sims-page-head__title">Attendance Warnings</h1>
+        <p class="sims-page-head__sub">Students who have exceeded the @AbsenceLimit-absence limit on a unit.</p>
+    </div>
+    <div class="sims-page-head__actions">
+        <a href="/Report" class="btn btn-sm btn-outline-secondary"><i data-feather="arrow-left"></i> Back to reports</a>
+    </div>
+</div>
+
+<div class="sims-kpi-grid">
+    <article class="sims-kpi @(warnings.Any() ? "sims-kpi--danger" : "sims-kpi--success")">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Total Warnings</span>
+            <span class="sims-kpi__icon"><i data-feather="alert-triangle"></i></span>
+        </div>
+        <div class="sims-kpi__value">@warnings.Count</div>
+        <div class="sims-kpi__foot">Enrollments over the limit</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--warning">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Students Affected</span>
+            <span class="sims-kpi__icon"><i data-feather="users"></i></span>
+        </div>
+        <div class="sims-kpi__value">@warnings.Select(w => w.StudentId).Distinct().Count()</div>
+        <div class="sims-kpi__foot">Distinct individuals</div>
+    </article>
+
+    <article class="sims-kpi sims-kpi--info">
+        <div class="sims-kpi__top">
+            <span class="sims-kpi__label">Courses Affected</span>
+            <span class="sims-kpi__icon"><i data-feather="book-open"></i></span>
+        </div>
+        <div class="sims-kpi__value">@warnings.Select(w => w.CourseCode).Distinct().Count()</div>
+        <div class="sims-kpi__foot">Units with at-risk students</div>
+    </article>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <div>
+            <h2 class="card-title">Students Exceeding the Absence Limit</h2>
+            <p class="card-subtitle">Highest absence count first</p>
+        </div>
+    </div>
+
+    @if (warnings.Any())
+    {
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <caption class="px-4">Each row is one student on one unit, with absences above @AbsenceLimit</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Student</th>
+                        <th scope="col">Course</th>
+                        <th scope="col" class="text-end">Absences</th>
+                        <th scope="col" class="text-end">Sessions</th>
+                        <th scope="col" style="width:170px;">Absence rate</th>
+                    </tr>
+                </thead>
+                <tbody>
+                @foreach (var w in warnings.OrderByDescending(x => x.Absences))
+                {
+                    var rate = w.TotalSessions > 0 ? (double)w.Absences / w.TotalSessions * 100 : 0;
+                    var ini = string.IsNullOrWhiteSpace(w.StudentName) ? "?" : w.StudentName.Trim()[..1].ToUpper();
+
+                    <tr>
+                        <td>
+                            <div class="sims-person">
+                                <span class="sims-person__avatar" aria-hidden="true">@ini</span>
+                                <span class="sims-person__body">
+                                    <span class="sims-person__name">@w.StudentName</span>
+                                    <span class="sims-person__meta sims-mono">@w.StudentCode</span>
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight:600;">@w.CourseName</div>
+                            <div class="sims-mono" style="font-size:11.5px;color:var(--sims-muted);">@w.CourseCode</div>
+                        </td>
+                        <td class="text-end"><span class="badge bg-danger">@w.Absences</span></td>
+                        <td class="text-end tabular text-muted">@w.TotalSessions</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <div class="progress flex-grow-1" role="progressbar"
+                                     aria-label="@w.StudentName absence rate"
+                                     aria-valuenow="@((int)rate)" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar bg-danger" style="width:@Math.Max(rate, 2).ToString("F0")%"></div>
+                                </div>
+                                <span class="tabular" style="font-size:12px;font-weight:650;min-width:42px;text-align:right;">
+                                    @rate.ToString("F0")%
+                                </span>
+                            </div>
+                        </td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="sims-empty">
+            <div class="sims-empty__icon"><i data-feather="check-circle"></i></div>
+            <div class="sims-empty__title">No attendance warnings</div>
+            <p class="sims-empty__text">No student has exceeded the @AbsenceLimit-absence limit on any unit.</p>
+        </div>
+    }
+</div>

@@ -1,0 +1,88 @@
+@model DayNeCu3726.Models.ViewModels.CreateExamViewModel
+@{
+    ViewData["Title"] = "Tạo Lịch thi";
+    var courses = ViewBag.Courses as IEnumerable<DayNeCu3726.Models.Entities.Course>;
+    var faculties = ViewBag.Faculties as IEnumerable<DayNeCu3726.Models.Entities.User>;
+}
+
+<div class="row mb-3">
+    <div class="col-12">
+        <h1 class="h3 mb-0"><i data-feather="calendar" class="sims-h-ico"></i> Allocate Exam Schedule</h1>
+    </div>
+</div>
+
+<div class="card" style="max-width: 600px;">
+    <div class="card-body">
+        <form asp-action="Create" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+            
+            <div class="mb-3">
+                <label asp-for="CourseId" class="form-label"></label>
+                <select asp-for="CourseId" class="form-select">
+                    <option value="">-- Select Course --</option>
+                    @if (courses != null)
+                    {
+                        foreach (var c in courses)
+                        {
+                            <option value="@c.CourseId">@c.CourseCode - @c.Name</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="CourseId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ExamType" class="form-label"></label>
+                <select asp-for="ExamType" class="form-select">
+                    <option value="Final">Final</option>
+                    <option value="Midterm">Midterm</option>
+                    <option value="Quiz">Quiz</option>
+                </select>
+                <span asp-validation-for="ExamType" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ExamDate" class="form-label"></label>
+                <input asp-for="ExamDate" class="form-control" type="date" />
+                <span asp-validation-for="ExamDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="TimeSlot" class="form-label"></label>
+                <input asp-for="TimeSlot" class="form-control" />
+                <span asp-validation-for="TimeSlot" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Room" class="form-label"></label>
+                <input asp-for="Room" class="form-control" />
+                <span asp-validation-for="Room" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="SupervisorId" class="form-label"></label>
+                <select asp-for="SupervisorId" class="form-select">
+                    <option value="">-- None --</option>
+                    @if (faculties != null)
+                    {
+                        foreach (var f in faculties)
+                        {
+                            <option value="@f.Id">@f.FullName</option>
+                        }
+                    }
+                </select>
+                <span asp-validation-for="SupervisorId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Semester" class="form-label"></label>
+                <input asp-for="Semester" class="form-control" />
+                <span asp-validation-for="Semester" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a href="/Exam" class="btn btn-secondary">Cancel</a>
+        </form>
+    </div>
+</div>

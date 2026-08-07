@@ -1,0 +1,81 @@
+/* Simple Dark Mode Overrides for SIMS */
+body.dark-mode {
+    /* Neutrals inverted */
+    --sims-surface: #1e293b;
+    --sims-canvas: #0f172a;
+    --sims-canvas-alt: #1e293b;
+    --sims-ink: #f8fafc;
+    --sims-ink-soft: #cbd5e1;
+    --sims-muted: #94a3b8;
+    --sims-faint: #64748b;
+    --sims-line: #334155;
+    --sims-line-soft: #1e293b;
+
+    background-color: var(--sims-canvas);
+    color: var(--sims-ink);
+}
+
+body.dark-mode .card,
+body.dark-mode .navbar,
+body.dark-mode .sims-topbar,
+body.dark-mode .form-control,
+body.dark-mode .form-select,
+body.dark-mode .list-group-item {
+    background-color: var(--sims-surface) !important;
+    color: var(--sims-ink);
+    border-color: var(--sims-line);
+}
+
+body.dark-mode .card-header,
+body.dark-mode .card-footer {
+    border-color: var(--sims-line-soft);
+    background-color: var(--sims-canvas-alt);
+}
+
+body.dark-mode .table > thead > tr > th,
+body.dark-mode .table > tbody > tr > td {
+    color: var(--sims-ink);
+    border-color: var(--sims-line);
+}
+
+body.dark-mode .table > tbody > tr:hover > td {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+body.dark-mode .input-group-text {
+    background-color: var(--sims-canvas);
+    border-color: var(--sims-line);
+    color: var(--sims-muted);
+}
+
+body.dark-mode .form-control:focus, 
+body.dark-mode .form-select:focus {
+    background-color: var(--sims-canvas);
+    color: var(--sims-ink);
+}
+
+body.dark-mode .btn-secondary, 
+body.dark-mode .btn-outline-secondary, 
+body.dark-mode .btn-light {
+    background-color: var(--sims-canvas);
+    border-color: var(--sims-line);
+    color: var(--sims-ink-soft);
+}
+
+body.dark-mode .text-muted {
+    color: var(--sims-muted) !important;
+}
+
+body.dark-mode .dropdown-menu {
+    background-color: var(--sims-surface);
+    border-color: var(--sims-line);
+}
+
+body.dark-mode .dropdown-item {
+    color: var(--sims-ink);
+}
+
+body.dark-mode .dropdown-item:hover {
+    background-color: var(--sims-canvas);
+    color: var(--sims-ink);
+}

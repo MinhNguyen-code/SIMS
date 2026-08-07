@@ -1,0 +1,373 @@
+@model DayNeCu3726.Models.ViewModels.DashboardViewModel
+@using DayNeCu3726.Models.Enums
+@using DayNeCu3726.Patterns.Singleton
+@{
+    ViewData["Title"] = "Dashboard";
+
+    var isBtec = SystemConfiguration.Instance.GradingScheme == GradingScheme.Btec;
+
+    // BTEC awards Pass/Merit/Distinction rather than a 4-point GPA, so the metric
+    // is labelled for whichever scheme is configured.
+    var averageLabel = isBtec ? "Average Mark" : "GPA";
+    var averageHint  = isBtec ? "Across graded units" : "Current GPA";
+
+    var greeting = DateTime.Now.Hour < 12 ? "Good morning"
+                 : DateTime.Now.Hour < 18 ? "Good afternoon"
+                 : "Good evening";
+
+    var roleLabel = Model.UserRole switch
+    {
+        "Admin"   => "Administrator",
+        "Faculty" => "Faculty",
+        "Student" => "Student",
+        _         => Model.UserRole
+    };
+}
+
+<div class="sims-page-head">
+    <div>
+        <div class="sims-rule"></div>
+        <h1 class="sims-page-head__title">@roleLabel Dashboard</h1>
+        <p class="sims-page-head__sub">@greeting, <strong>@Model.UserName</strong> — here is where things stand today.</p>
+    </div>
+    <div class="sims-page-head__actions">
+        <span class="badge bg-secondary" style="padding:7px 12px;">
+            <i data-feather="calendar" style="width:13px;height:13px;vertical-align:-2px;"></i>
+            @DateTime.Now.ToString("dddd, dd MMMM yyyy")
+        </span>
+    </div>
+</div>
+
+@* ══ KPI strip ═══════════════════════════════════════════════════════════
+   Four metrics at most, in the order the eye scans them. Each card carries a
+   coloured top edge so metric families are distinguishable at a glance. *@
+<div class="sims-kpi-grid">
+
+    @if (Model.UserRole == "Admin" || Model.UserRole == "Faculty")
+    {
+        <article class="sims-kpi">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">Students</span>
+                <span class="sims-kpi__icon"><i data-feather="users"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.TotalStudents</div>
+            <div class="sims-kpi__foot">Registered in the system</div>
+        </article>
+
+        <article class="sims-kpi sims-kpi--info">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">Courses</span>
+                <span class="sims-kpi__icon"><i data-feather="book-open"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.TotalCourses</div>
+            <div class="sims-kpi__foot">
+                <span class="sims-kpi__delta sims-kpi__delta--up">@Model.ActiveCourses active</span>
+                @if (Model.TotalCourses > Model.ActiveCourses)
+                {
+                    <span> · @(Model.TotalCourses - Model.ActiveCourses) inactive</span>
+                }
+            </div>
+        </article>
+
+        <article class="sims-kpi sims-kpi--success">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">Enrollments</span>
+                <span class="sims-kpi__icon"><i data-feather="user-check"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.TotalEnrollments</div>
+            <div class="sims-kpi__foot">Student–course registrations</div>
+        </article>
+
+        @if (Model.UserRole == "Faculty")
+        {
+            <article class="sims-kpi sims-kpi--gold">
+                <div class="sims-kpi__top">
+                    <span class="sims-kpi__label">My Courses</span>
+                    <span class="sims-kpi__icon"><i data-feather="layers"></i></span>
+                </div>
+                <div class="sims-kpi__value">@Model.MyCourses.Count()</div>
+                <div class="sims-kpi__foot">Assigned to you this term</div>
+            </article>
+        }
+        else
+        {
+            <article class="sims-kpi sims-kpi--gold">
+                <div class="sims-kpi__top">
+                    <span class="sims-kpi__label">Faculty</span>
+                    <span class="sims-kpi__icon"><i data-feather="briefcase"></i></span>
+                </div>
+                <div class="sims-kpi__value">@Model.TotalFaculty</div>
+                <div class="sims-kpi__foot">Teaching staff on record</div>
+            </article>
+        }
+    }
+
+    @if (Model.UserRole == "Student")
+    {
+        <article class="sims-kpi">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">My Courses</span>
+                <span class="sims-kpi__icon"><i data-feather="book"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.MyEnrollments.Count()</div>
+            <div class="sims-kpi__foot">Currently enrolled</div>
+        </article>
+
+        <article class="sims-kpi sims-kpi--gold">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">@averageLabel</span>
+                <span class="sims-kpi__icon"><i data-feather="award"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.MyGPA.ToString("F2")<span style="font-size:1rem;color:var(--sims-faint);font-weight:600;"> / 10</span></div>
+            <div class="sims-kpi__foot">@averageHint</div>
+        </article>
+
+        <article class="sims-kpi sims-kpi--success">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">Credits</span>
+                <span class="sims-kpi__icon"><i data-feather="check-square"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.MyCredits</div>
+            <div class="sims-kpi__foot">Total credits taken</div>
+        </article>
+
+        <article class="sims-kpi sims-kpi--info">
+            <div class="sims-kpi__top">
+                <span class="sims-kpi__label">Available</span>
+                <span class="sims-kpi__icon"><i data-feather="search"></i></span>
+            </div>
+            <div class="sims-kpi__value">@Model.ActiveCourses</div>
+            <div class="sims-kpi__foot">Open courses to browse</div>
+        </article>
+    }
+</div>
+
+@* ══ Admin / Faculty body ════════════════════════════════════════════════ *@
+@if (Model.UserRole == "Admin" || Model.UserRole == "Faculty")
+{
+    <div class="row g-4">
+        <div class="col-12 col-xl-7">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Recent Students</h2>
+                        <p class="card-subtitle">Most recently registered records</p>
+                    </div>
+                    <a href="/Student" class="btn btn-sm btn-outline-primary">
+                        View all <i data-feather="arrow-right"></i>
+                    </a>
+                </div>
+
+                @if (Model.RecentStudents.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Student</th>
+                                    <th scope="col">Program</th>
+                                    @if (!isBtec) { <th scope="col">GPA</th> }
+                                    <th scope="col">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var s in Model.RecentStudents)
+                            {
+                                var statusClass = s.AcademicStatus switch
+                                {
+                                    AcademicStatus.Active     => "bg-success",
+                                    AcademicStatus.Graduated  => "bg-primary",
+                                    AcademicStatus.Suspended  => "bg-danger",
+                                    _                         => "bg-secondary"
+                                };
+                                var ini = string.IsNullOrWhiteSpace(s.FullName) ? "?" : s.FullName.Trim()[..1].ToUpper();
+
+                                <tr>
+                                    <td>
+                                        <div class="sims-person">
+                                            <span class="sims-person__avatar" aria-hidden="true">@ini</span>
+                                            <span class="sims-person__body">
+                                                <span class="sims-person__name">@s.FullName</span>
+                                                <span class="sims-person__meta sims-mono">@s.StudentCode</span>
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>@s.Program</td>
+                                    @if (!isBtec)
+                                    {
+                                        var gpaClass = s.GPA >= 8.5 ? "bg-success"
+                                                     : s.GPA >= 7.0 ? "bg-primary"
+                                                     : s.GPA >= 5.0 ? "bg-warning"
+                                                     : "bg-secondary";
+                                        <td><span class="badge @gpaClass">@s.GPA.ToString("F2")</span></td>
+                                    }
+                                    <td><span class="badge @statusClass">@s.AcademicStatus</span></td>
+                                </tr>
+                            }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="sims-empty">
+                        <div class="sims-empty__icon"><i data-feather="users"></i></div>
+                        <div class="sims-empty__title">No students yet</div>
+                        <p class="sims-empty__text">Register a student, or import a CSV file from the Bulk Dataset page.</p>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="col-12 col-xl-5">
+            <div class="card h-100">
+                <div class="card-header">
+                    <div>
+                        <h2 class="card-title">Course Capacity</h2>
+                        <p class="card-subtitle">Highest enrolment this term</p>
+                    </div>
+                    <a href="/Course" class="btn btn-sm btn-outline-primary">
+                        View all <i data-feather="arrow-right"></i>
+                    </a>
+                </div>
+                <div class="card-body">
+                    @if (Model.PopularCourses.Any())
+                    {
+                        <div class="sims-stack">
+                        @foreach (var c in Model.PopularCourses)
+                        {
+                            var pct = (int)Math.Round(c.FillPercentage);
+                            var barClass = pct >= 90 ? "bg-danger" : pct >= 70 ? "bg-warning" : "";
+
+                            <div>
+                                <div class="d-flex justify-content-between align-items-baseline mb-1 gap-2">
+                                    <div style="min-width:0;">
+                                        <div style="font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">
+                                            @c.Name
+                                        </div>
+                                        <div class="sims-mono" style="font-size:11.5px;color:var(--sims-muted);">@c.CourseCode</div>
+                                    </div>
+                                    <span class="tabular" style="font-size:12.5px;color:var(--sims-muted);white-space:nowrap;">
+                                        @c.CurrentEnrollment / @c.MaxEnrollment
+                                    </span>
+                                </div>
+                                <div class="progress" role="progressbar"
+                                     aria-label="@c.Name enrolment" aria-valuenow="@pct" aria-valuemin="0" aria-valuemax="100">
+                                    <div class="progress-bar @barClass" style="width:@(Math.Max(pct, 2))%"></div>
+                                </div>
+                            </div>
+                        }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="sims-empty">
+                            <div class="sims-empty__icon"><i data-feather="book-open"></i></div>
+                            <div class="sims-empty__title">No courses yet</div>
+                            <p class="sims-empty__text">Create a course to start accepting enrolments.</p>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.UserRole == "Admin")
+    {
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">Quick Actions</h2>
+            </div>
+            <div class="card-body">
+                <div class="sims-row">
+                    <a href="/Student/Create" class="btn btn-primary"><i data-feather="user-plus"></i> Add Student</a>
+                    <a href="/Course/Create" class="btn btn-outline-primary"><i data-feather="plus-circle"></i> Create Course</a>
+                    <a href="/Dataset" class="btn btn-outline-primary"><i data-feather="upload"></i> Import CSV</a>
+                    <a href="/Report" class="btn btn-outline-secondary"><i data-feather="pie-chart"></i> Reports</a>
+                    <a href="/Announcement" class="btn btn-outline-secondary"><i data-feather="bell"></i> Announcements</a>
+                </div>
+            </div>
+        </div>
+    }
+}
+
+@* ══ Student body ════════════════════════════════════════════════════════ *@
+@if (Model.UserRole == "Student")
+{
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">My Enrolled Courses</h2>
+                <p class="card-subtitle">Marks are shown once your tutor releases them</p>
+            </div>
+            <a href="/Enrollment/Browse" class="btn btn-sm btn-primary">
+                <i data-feather="search"></i> Browse courses
+            </a>
+        </div>
+
+        @if (Model.MyEnrollments.Any())
+        {
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Course</th>
+                            <th scope="col">Faculty</th>
+                            <th scope="col">Schedule</th>
+                            <th scope="col">Mark</th>
+                            <th scope="col">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var e in Model.MyEnrollments)
+                    {
+                        var statusClass = e.Status switch
+                        {
+                            EnrollmentStatus.Completed => "bg-success",
+                            EnrollmentStatus.Enrolled  => "bg-primary",
+                            EnrollmentStatus.Failed    => "bg-danger",
+                            EnrollmentStatus.Dropped   => "bg-secondary",
+                            _                          => "bg-secondary"
+                        };
+
+                        <tr>
+                            <td>
+                                <div style="font-weight:600;">@e.CourseName</div>
+                                <div class="sims-mono" style="font-size:11.5px;color:var(--sims-muted);">@e.CourseCode</div>
+                            </td>
+                            <td>@e.FacultyName</td>
+                            <td style="font-size:12.5px;color:var(--sims-muted);">@e.Schedule</td>
+                            <td>
+                                @if (e.Grade.HasValue)
+                                {
+                                    var markClass = e.Grade >= 8.5 ? "bg-success"
+                                                  : e.Grade >= 7.0 ? "bg-primary"
+                                                  : e.Grade >= 5.0 ? "bg-warning"
+                                                  : "bg-danger";
+                                    <span class="badge @markClass">
+                                        @e.Grade.Value.ToString("F1")@(string.IsNullOrEmpty(e.LetterGrade) ? "" : $" ({e.LetterGrade})")
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">—</span>
+                                }
+                            </td>
+                            <td><span class="badge @statusClass">@e.Status</span></td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            <div class="sims-empty">
+                <div class="sims-empty__icon"><i data-feather="book"></i></div>
+                <div class="sims-empty__title">You are not enrolled in any course</div>
+                <p class="sims-empty__text">Browse the course catalogue to register for this term.</p>
+                <a href="/Enrollment/Browse" class="btn btn-primary mt-3"><i data-feather="search"></i> Browse courses</a>
+            </div>
+        }
+    </div>
+}

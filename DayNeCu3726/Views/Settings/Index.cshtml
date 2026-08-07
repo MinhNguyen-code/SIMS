@@ -1,0 +1,156 @@
+@model DayNeCu3726.Models.ViewModels.SettingsViewModel
+@{
+    ViewData["Title"] = "Account Settings";
+    var userName = Context.Session.GetString("UserName") ?? "User";
+    var currentTheme = Context.Request.Cookies["theme"] ?? "light";
+    var currentLang = Context.Request.Cookies["language"] ?? "en";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h1 class="h3 mb-0">Settings</h1>
+        <p class="text-muted">Manage your personal profile, security, and preferences.</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3 col-xl-2">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Profile Settings</h5>
+            </div>
+            <div class="list-group list-group-flush" role="tablist">
+                <a class="list-group-item list-group-item-action @(Model.ActiveTab == "profile" ? "active" : "")" data-bs-toggle="list" href="#account" role="tab">
+                    Account
+                </a>
+                <a class="list-group-item list-group-item-action @(Model.ActiveTab == "password" ? "active" : "")" data-bs-toggle="list" href="#password" role="tab">
+                    Password
+                </a>
+                <a class="list-group-item list-group-item-action @(Model.ActiveTab == "preferences" ? "active" : "")" data-bs-toggle="list" href="#preferences" role="tab">
+                    Preferences
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9 col-xl-10">
+        <div class="tab-content">
+            
+            <!-- Profile Tab -->
+            <div class="tab-pane fade @(Model.ActiveTab == "profile" ? "show active" : "")" id="account" role="tabpanel">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Public info</h5>
+                    </div>
+                    <div class="card-body">
+                        <form asp-action="UpdateProfile" method="post">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <div class="mb-3">
+                                        <label asp-for="Profile.FullName" class="form-label"></label>
+                                        <input asp-for="Profile.FullName" class="form-control" />
+                                        <span asp-validation-for="Profile.FullName" class="text-danger small"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Profile.Email" class="form-label"></label>
+                                        <input asp-for="Profile.Email" class="form-control" />
+                                        <span asp-validation-for="Profile.Email" class="text-danger small"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Profile.PhoneNumber" class="form-label"></label>
+                                        <input asp-for="Profile.PhoneNumber" class="form-control" />
+                                        <span asp-validation-for="Profile.PhoneNumber" class="text-danger small"></span>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label asp-for="Profile.Address" class="form-label"></label>
+                                        <textarea asp-for="Profile.Address" class="form-control" rows="2"></textarea>
+                                        <span asp-validation-for="Profile.Address" class="text-danger small"></span>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="text-center">
+                                        <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mb-2" style="width:128px; height:128px; font-size:48px;">
+                                            @(userName.Substring(0, 1))
+                                        </div>
+                                        <div class="mt-2">
+                                            <span class="btn btn-primary"><i class="align-middle" data-feather="upload"></i> Upload</span>
+                                        </div>
+                                        <small class="text-muted d-block mt-2">For best results, use an image at least 128px by 128px in .jpg format</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Save changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Password Tab -->
+            <div class="tab-pane fade @(Model.ActiveTab == "password" ? "show active" : "")" id="password" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Password</h5>
+                        <form asp-action="ChangePassword" method="post">
+                            <div class="mb-3">
+                                <label asp-for="ChangePassword.CurrentPassword" class="form-label"></label>
+                                <input asp-for="ChangePassword.CurrentPassword" class="form-control" />
+                                <span asp-validation-for="ChangePassword.CurrentPassword" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="ChangePassword.NewPassword" class="form-label"></label>
+                                <input asp-for="ChangePassword.NewPassword" class="form-control" />
+                                <span asp-validation-for="ChangePassword.NewPassword" class="text-danger small"></span>
+                            </div>
+                            <div class="mb-3">
+                                <label asp-for="ChangePassword.ConfirmPassword" class="form-label"></label>
+                                <input asp-for="ChangePassword.ConfirmPassword" class="form-control" />
+                                <span asp-validation-for="ChangePassword.ConfirmPassword" class="text-danger small"></span>
+                            </div>
+                            <button type="submit" class="btn btn-primary mt-3">Save password</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preferences Tab -->
+            <div class="tab-pane fade @(Model.ActiveTab == "preferences" ? "show active" : "")" id="preferences" role="tabpanel">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Display Preferences</h5>
+                        
+                        <form asp-action="ToggleTheme" method="post" class="mb-4 mt-3">
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <div class="mb-3">
+                                <label class="form-label">Theme</label>
+                                <select name="theme" class="form-select" style="max-width:250px;" onchange="this.form.submit()">
+                                    <option value="light" selected="@(currentTheme == "light" ? "selected" : null)">Light Mode (Default)</option>
+                                    <option value="dark" selected="@(currentTheme == "dark" ? "selected" : null)">Dark Mode</option>
+                                </select>
+                            </div>
+                        </form>
+
+                        <hr />
+
+                        <h5 class="card-title mt-4">Language</h5>
+                        <form asp-action="ChangeLanguage" method="post" class="mt-3">
+                            <input type="hidden" name="returnUrl" value="@Context.Request.Path" />
+                            <div class="mb-3">
+                                <label class="form-label">System Language</label>
+                                <select name="lang" class="form-select" style="max-width:250px;" onchange="this.form.submit()">
+                                    <option value="en" selected="@(currentLang == "en" ? "selected" : null)">English</option>
+                                    <option value="vi" selected="@(currentLang == "vi" ? "selected" : null)">Tiếng Việt (Vietnamese)</option>
+                                </select>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

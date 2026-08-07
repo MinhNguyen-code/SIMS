@@ -1,0 +1,85 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.ExamViewModel>
+@{
+    ViewData["Title"] = "Exam Schedule";
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="edit-3" class="sims-h-ico"></i> Manage Exam Schedule</h1>
+        </div>
+        @if (role == "Admin")
+        {
+            <a href="/Exam/Create" class="btn btn-primary">
+                <i class="align-middle" data-feather="plus"></i> Create Exam Schedule
+            </a>
+        }
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover my-0">
+                <thead>
+                    <tr>
+                        <th>Course</th>
+                        <th>Type</th>
+                        <th>Exam Date</th>
+                        <th>Time Slot</th>
+                        <th>Room</th>
+                        <th>Status</th>
+                        <th>Eligible count</th>
+                        <th class="text-end">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                <strong>@item.CourseName</strong><br/>
+                                <small class="text-muted">@item.CourseCode</small>
+                            </td>
+                            <td>@item.ExamType</td>
+                            <td>@item.ExamDate.ToString("dd/MM/yyyy")</td>
+                            <td>@item.TimeSlot</td>
+                            <td>@item.Room</td>
+                            <td>
+                                @if (role == "Admin" || role == "Faculty")
+                                {
+                                    <form action="/Exam/UpdateStatus" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@item.ExamId" />
+                                        <select name="status" class="form-select form-select-sm badge @item.StatusBadgeClass text-white border-0" onchange="this.form.submit()">
+                                            @foreach (var val in Enum.GetValues<DayNeCu3726.Models.Enums.ExamStatus>())
+                                            {
+                                                if (item.Status == val)
+                                                {
+                                                    <option value="@val" selected>@val</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@val" class="bg-white text-dark">@val</option>
+                                                }
+                                            }
+                                        </select>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="badge @item.StatusBadgeClass">@item.Status</span>
+                                }
+                            </td>
+                            <td>@item.EligibleStudentCount</td>
+                            <td class="text-end">
+                                <a href="/Exam/Details/@item.ExamId" class="btn btn-sm btn-outline-primary">Details</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,125 @@
+@model DayNeCu3726.Models.ViewModels.GradeEntryViewModel
+@{
+    ViewData["Title"] = "Enter Grade";
+}
+
+<div class="row">
+    <div class="col-md-6 col-xl-5">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0"><i data-feather="edit-3" class="sims-h-ico"></i> Enter Grade & Attendance</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-flex align-items-center mb-4">
+                    <div class="avatar-initials me-3">@Model.StudentName[0]</div>
+                    <div>
+                        <h4 class="mb-0">@Model.StudentName</h4>
+                        <p class="text-muted mb-0">@Model.CourseCode – @Model.CourseName</p>
+                    </div>
+                </div>
+
+                <form asp-action="Grade" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="EnrollmentId" />
+                    <input type="hidden" asp-for="StudentName" />
+                    <input type="hidden" asp-for="CourseCode" />
+                    <input type="hidden" asp-for="CourseName" />
+
+                    <div class="mb-3">
+                        <label class="form-label">Absences (Missed Sessions)</label>
+                        <input asp-for="Absences" type="number" min="0" max="30"
+                               class="form-control form-control-lg" id="absencesInput" />
+                        <span asp-validation-for="Absences" class="text-danger small"></span>
+                        <div class="form-text">Each course has 30 sessions in total. Max allowed absences is 6. Over 6 absences results in an automatic Fail (F).</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Grade (0.0 – 10.0)</label>
+                        <input asp-for="Grade" type="number" step="0.1" min="0" max="10"
+                               class="form-control form-control-lg" id="gradeInput" />
+                        <span asp-validation-for="Grade" class="text-danger small"></span>
+                        <div class="form-text">Enter the score out of 10 to evaluate: P (Pass) &ge; 5.0, M (Merit) &ge; 7.0, D (Distinction) &ge; 8.5.</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Grade Evaluation Preview</label>
+                        <div class="p-3 bg-light rounded text-center">
+                            <h2 class="mb-0" id="gradePreview">—</h2>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Remarks (optional)</label>
+                        <textarea asp-for="Remarks" class="form-control" rows="2"
+                                  placeholder="Enter optional feedback..."></textarea>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg"><i data-feather="save" class="sims-h-ico"></i> Save Grade & Attendance</button>
+                        <a href="javascript:history.back()" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: #3b7ddd;
+    color: white;
+    font-size: 18px;
+    font-weight: 700;
+}
+</style>
+
+@section Scripts {
+<script>
+const gradeInput = document.getElementById('gradeInput');
+const absencesInput = document.getElementById('absencesInput');
+const preview = document.getElementById('gradePreview');
+
+function getLetterGrade(g, absences) {
+    if (absences > 6) {
+        return 'F (Fail - ' + absences + ' absences / limit is 6)';
+    }
+    if (g >= 8.5) return 'D (Distinction)';
+    if (g >= 7.0) return 'M (Merit)';
+    if (g >= 5.0) return 'P (Pass)';
+    return 'F (Fail)';
+}
+
+function updatePreview() {
+    const val = parseFloat(gradeInput.value);
+    const absences = parseInt(absencesInput.value) || 0;
+    
+    if (!isNaN(val) && val >= 0 && val <= 10) {
+        const text = getLetterGrade(val, absences);
+        preview.textContent = text;
+        
+        if (absences > 6 || val < 5.0) {
+            preview.className = "mb-0 text-danger";
+        } else if (val >= 8.5) {
+            preview.className = "mb-0 text-success fw-bold";
+        } else if (val >= 7.0) {
+            preview.className = "mb-0 text-primary";
+        } else {
+            preview.className = "mb-0 text-info";
+        }
+    } else {
+        preview.textContent = '—';
+        preview.className = 'mb-0 text-muted';
+    }
+}
+
+gradeInput.addEventListener('input', updatePreview);
+absencesInput.addEventListener('input', updatePreview);
+document.addEventListener('DOMContentLoaded', updatePreview);
+</script>
+}

@@ -1,0 +1,69 @@
+@model IEnumerable<DayNeCu3726.Models.ViewModels.SubmissionViewModel>
+@{
+    ViewData["Title"] = "Submissions";
+    var assignment = ViewBag.Assignment as DayNeCu3726.Models.Entities.Assignment;
+    var role = Context.Session.GetString("UserRole") ?? "";
+}
+
+<div class="mb-3">
+    <a href="/Assignment/Index" class="text-decoration-none"><i data-feather="arrow-left"></i> Back to Assignments</a>
+</div>
+
+<h1 class="h3 mb-3">Submissions for: @assignment?.Title</h1>
+
+<div class="card">
+    <div class="card-body">
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student Code</th>
+                    <th>Submitted At</th>
+                    <th>File</th>
+                    <th>Grade</th>
+                    @if (role == "Faculty")
+                    {
+                        <th>Action</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var sub in Model)
+                {
+                    <tr>
+                        <td>@sub.StudentName</td>
+                        <td>@sub.StudentCode</td>
+                        <td>@sub.SubmittedAt.ToLocalTime().ToString("g")</td>
+                        <td>
+                            <a href="~/uploads/assignments/@sub.FilePath" target="_blank" class="text-decoration-none">
+                                <i data-feather="file-text"></i> @sub.OriginalFileName
+                            </a>
+                        </td>
+                        <td>
+                            @if (sub.Grade.HasValue)
+                            {
+                                <strong>@sub.Grade.Value.ToString("0.0")</strong>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning text-dark">Needs Grading</span>
+                            }
+                        </td>
+                        @if (role == "Faculty")
+                        {
+                            <td>
+                                <a href="/Assignment/Grade/@sub.SubmissionId" class="btn btn-sm btn-outline-primary">Grade</a>
+                            </td>
+                        }
+                    </tr>
+                }
+                @if (!Model.Any())
+                {
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">No submissions yet.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

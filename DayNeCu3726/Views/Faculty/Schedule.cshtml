@@ -1,0 +1,77 @@
+@model dynamic
+
+@{
+    ViewData["Title"] = "Teaching Schedule";
+    var days = new[] { "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" };
+    var slots = new[] { "Slot 1 (07:30 - 09:30)", "Slot 2 (09:40 - 11:40)", "Slot 3 (12:50 - 14:50)", "Slot 4 (15:00 - 17:00)", "Slot 5 (17:10 - 19:10)", "Slot 6 (19:20 - 21:20)" };
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <h1 class="h3 mb-0 text-gray-800">Teaching Schedule</h1>
+        <div class="text-muted">
+            <i data-feather="calendar" class="me-2"></i> Current Week
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0 text-center align-middle" style="min-width: 900px;">
+                <thead class="bg-light">
+                    <tr>
+                        <th class="py-3" style="width: 15%;">Slot \ Day</th>
+                        @foreach (var day in days)
+                        {
+                            <th class="py-3" style="width: 14%;">@day</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (int i = 0; i < slots.Length; i++)
+                    {
+                        <tr>
+                            <td class="fw-bold bg-light py-4 text-nowrap">@slots[i]</td>
+                            @for (int j = 0; j < days.Length; j++)
+                            {
+                                // Mocking some schedule data for presentation
+                                bool hasClass = (i + j) % 5 == 1; // Arbitrary pattern for demonstration
+
+                                <td class="p-2">
+                                    @if (Model != null)
+                                    {
+                                        // If real model is passed, we would render here
+                                    }
+                                    
+                                    @if (hasClass)
+                                    {
+                                        <div class="card bg-primary text-white mb-0 shadow-sm border-0" style="border-radius: 8px;">
+                                            <div class="card-body p-2">
+                                                <h6 class="text-white fw-bold mb-1">PROG102</h6>
+                                                <div class="small mb-1"><i data-feather="map-pin" style="width:12px;height:12px"></i> Room 302</div>
+                                                <div class="badge bg-white text-primary">30 Students</div>
+                                            </div>
+                                        </div>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .table-bordered th, .table-bordered td {
+        border-color: #f1f2f5;
+    }
+    .bg-primary {
+        background-color: var(--sims-navy-700) !important;
+    }
+    .text-primary {
+        color: var(--sims-navy-700) !important;
+    }
+</style>

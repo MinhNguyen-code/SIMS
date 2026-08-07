@@ -1,0 +1,219 @@
+@model DayNeCu3726.Models.ViewModels.StudentListViewModel
+@using DayNeCu3726.Patterns.Singleton
+@using DayNeCu3726.Models.Enums
+@{
+    ViewData["Title"] = "Students List";
+    var role = Context.Session.GetString("UserRole") ?? "";
+    var isBtec = SystemConfiguration.Instance.GradingScheme == GradingScheme.Btec;
+}
+
+<div class="row mb-3">
+    <div class="col-12 d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="h3 mb-0"><i data-feather="users" class="sims-h-ico"></i> Students Directory</h1>
+            <p class="text-muted mb-0">Manage all registered students (@Model.TotalCount total)</p>
+        </div>
+        @if (role == "Admin")
+        {
+            <a href="/Student/Create" class="btn btn-primary">
+                <i class="align-middle" data-feather="user-plus"></i> Add Student
+            </a>
+        }
+    </div>
+</div>
+
+<!-- Search Bar & Filters -->
+<div class="card mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-white border-end-0"><i data-feather="search" class="text-muted" style="width:16px;height:16px;"></i></span>
+                    <input name="search" value="@Model.SearchQuery" class="form-control border-start-0" placeholder="Search by name, student code, program..." />
+                </div>
+            </div>
+            <div class="col-md-3 d-grid gap-2 d-md-flex justify-content-md-end">
+                <button type="submit" class="btn btn-primary flex-fill">Search</button>
+                @if (!string.IsNullOrEmpty(Model.SearchQuery))
+                {
+                    <a href="/Student" class="btn btn-outline-secondary">Clear</a>
+                }
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Student List Table -->
+<div class="card">
+    <div class="card-body p-0">
+        @if (!Model.Students.Any())
+        {
+            <div class="text-center py-5">
+                <i data-feather="users" style="width:48px;height:48px;" class="text-muted mb-3"></i>
+                <p class="text-muted">No students found.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover my-0">
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Code</th>
+                            <th>Program</th>
+                            <th>Department</th>
+                            @if (!isBtec)
+                            {
+                                <th>GPA</th>
+                            }
+                            else
+                            {
+                                <th>Grading Model</th>
+                            }
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    @foreach (var s in Model.Students)
+                    {
+                        var statusClass = s.AcademicStatus.ToString() switch {
+                            "Active" => "bg-success",
+                            "Graduated" => "bg-primary",
+                            "OnLeave" => "bg-warning",
+                            _ => "bg-danger"
+                        };
+                        
+                        var gpaClass = s.GPA >= 8.5 ? "success" : s.GPA >= 7.0 ? "primary" : s.GPA >= 5.0 ? "warning" : "danger";
+
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-initials me-2">@s.FullName[0]</div>
+                                    <div>
+                                        <strong>@s.FullName</strong><br/>
+                                        <small class="text-muted">@s.Email</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td><span class="badge bg-light text-dark">@s.StudentCode</span></td>
+                            <td>@s.Program</td>
+                            <td class="text-muted">@s.Department</td>
+                            @if (!isBtec)
+                            {
+                                <td><span class="badge bg-@gpaClass">@s.GPA.ToString("F2")</span></td>
+                            }
+                            else
+                            {
+                                <td><span class="badge bg-info">BTEC (P/M/D)</span></td>
+                            }
+                            <td>
+                                @if (role == "Admin" || role == "Faculty")
+                                {
+                                    <form action="/Student/UpdateStatus" method="post" class="d-inline">
+                                        @Html.AntiForgeryToken()
+                                        <input type="hidden" name="id" value="@s.Id" />
+                                        <select name="status" class="form-select form-select-sm badge @statusClass text-white border-0" onchange="this.form.submit()">
+                                            @foreach (var val in Enum.GetValues<AcademicStatus>())
+                                            {
+                                                if (s.AcademicStatus == val)
+                                                {
+                                                    <option value="@val" selected>@val</option>
+                                                }
+                                                else
+                                                {
+                                                    <option value="@val" class="bg-white text-dark">@val</option>
+                                                }
+                                            }
+                                        </select>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <span class="badge @statusClass">@s.AcademicStatus</span>
+                                }
+                            </td>
+                            <td class="text-end">
+                                <div class="d-inline-flex gap-1">
+                                    <a href="/Student/Details/@s.Id" class="btn btn-sm btn-outline-primary" title="View details">
+                                        <i class="align-middle" data-feather="eye" style="width:14px;height:14px;"></i> View
+                                    </a>
+                                    @if (role == "Admin")
+                                    {
+                                        <a href="/Student/Edit/@s.Id" class="btn btn-sm btn-outline-warning" title="Edit info">
+                                            <i class="align-middle" data-feather="edit" style="width:14px;height:14px;"></i>
+                                        </a>
+                                        <a href="/Student/Delete/@s.Id" class="btn btn-sm btn-outline-danger" title="Delete record">
+                                            <i class="align-middle" data-feather="trash-2" style="width:14px;height:14px;"></i>
+                                        </a>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+
+    @*  Pagination 
+       Only one page of students is fetched and rendered at a time, so the page
+       stays fast no matter how many records the database holds. *@
+    @if (Model.TotalPages > 1)
+    {
+        <div class="card-footer d-flex justify-content-between align-items-center flex-wrap gap-2">
+            <small class="text-muted"> Showing @Model.FirstItemOnPage–@Model.LastItemOnPage of @Model.TotalCount students
+            </small>
+
+            <nav aria-label="Student list pagination">
+                <ul class="pagination pagination-sm mb-0">
+                    <li class="page-item @(Model.HasPreviousPage ? "" : "disabled")">
+                        <a class="page-link"
+                           href="@Url.Action("Index", new { search = Model.SearchQuery, page = Model.PageNumber - 1, pageSize = Model.PageSize })"
+                           aria-label="Previous page">&laquo;</a>
+                    </li>
+
+                    @{
+                        // Show a sliding window of page numbers rather than every page, which would
+                        // itself become unusable on a large dataset.
+                        var windowStart = Math.Max(1, Model.PageNumber - 2);
+                        var windowEnd = Math.Min(Model.TotalPages, windowStart + 4);
+                        windowStart = Math.Max(1, windowEnd - 4);
+                    }
+
+                    @for (var pageNumber = windowStart; pageNumber <= windowEnd; pageNumber++)
+                    {
+                        <li class="page-item @(pageNumber == Model.PageNumber ? "active" : "")">
+                            <a class="page-link"
+                               href="@Url.Action("Index", new { search = Model.SearchQuery, page = pageNumber, pageSize = Model.PageSize })"
+                               aria-current="@(pageNumber == Model.PageNumber ? "page" : null)">@pageNumber</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(Model.HasNextPage ? "" : "disabled")">
+                        <a class="page-link"
+                           href="@Url.Action("Index", new { search = Model.SearchQuery, page = Model.PageNumber + 1, pageSize = Model.PageSize })"
+                           aria-label="Next page">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    }
+</div>
+
+<style>
+.avatar-initials {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #3b7ddd;
+    color: white;
+    font-size: 13px;
+    font-weight: 700;
+}
+</style>

@@ -1,0 +1,385 @@
+@{
+    var userId   = Context.Session.GetString("UserId");
+    var userName = Context.Session.GetString("UserName") ?? "Guest";
+    var userRole = Context.Session.GetString("UserRole") ?? "";
+    var isAuth   = !string.IsNullOrEmpty(userId);
+    var ctrl     = ViewContext.RouteData.Values["controller"]?.ToString() ?? "";
+    var action   = ViewContext.RouteData.Values["action"]?.ToString() ?? "";
+    var pageTitle = ViewData["Title"]?.ToString() ?? "Dashboard";
+
+    // Initials for the avatar, e.g. "Nguyen Van A" -> "NA"
+    var words = userName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var initials = words.Length == 0
+        ? "?"
+        : (words.Length == 1
+            ? words[0].Substring(0, Math.Min(2, words[0].Length))
+            : $"{words[0][0]}{words[^1][0]}").ToUpperInvariant();
+
+    // Groups the sidebar sections into a breadcrumb trail
+    string SectionOf(string controller) => controller switch
+    {
+        "Dashboard" => "Overview",
+        "Student" or "Course" or "Exam" or "Dataset" or "Report" or "Announcement" => "Management",
+        "Enrollment" or "Faculty" => "Academic",
+        "Finance" or "ServiceRequest" or "Feedback" => "Services",
+        "Parent" => "Parent Portal",
+        _ => "SIMS"
+    };
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="SIMS – Student Information Management System">
+    <meta name="theme-color" content="#0a1f3c">
+
+    <title>@pageTitle | SIMS</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <link href="~/css/adminkit.css" rel="stylesheet" asp-append-version="true" />
+    @* Loaded last so the SIMS design system takes precedence over the base template *@
+    <link href="~/css/sims-theme.css" rel="stylesheet" asp-append-version="true" />
+    @if (Context.Request.Cookies["theme"] == "dark")
+    {
+        <link href="~/css/dark-mode.css" rel="stylesheet" asp-append-version="true" />
+    }
+</head>
+
+<body class="@(Context.Request.Cookies["theme"] == "dark" ? "dark-mode" : "")">
+
+@if (isAuth)
+{
+<div class="wrapper">
+
+    <!--  Sidebar  -->
+    <nav id="sidebar" class="sidebar js-sidebar">
+        <div class="sidebar-content js-simplebar">
+
+            <a class="sidebar-brand" href="/Dashboard" aria-label="SIMS home">
+                <span class="sidebar-brand__mark" aria-hidden="true">S</span>
+                <span class="sidebar-brand__text">
+                    <span class="sidebar-brand__name">SIMS</span>
+                    <span class="sidebar-brand__sub">Student Information</span>
+                </span>
+            </a>
+
+            <ul class="sidebar-nav">
+                @{
+                    var lang = Context.Request.Cookies["language"] ?? "en";
+                    var txtOverview = lang == "vi" ? "Tổng quan" : "Overview";
+                    var txtManagement = lang == "vi" ? "Quản lý" : "Management";
+                    var txtTeaching = lang == "vi" ? "Giảng dạy" : "Teaching";
+                    var txtAcademic = lang == "vi" ? "Học tập" : "Academic";
+                }
+                
+                <li class="sidebar-header">@txtOverview</li>
+
+                <li class="sidebar-item @(ctrl == "Dashboard" ? "active" : "")">
+                    <a class="sidebar-link" href="/Dashboard">
+                        <i data-feather="grid"></i>
+                        <span class="align-middle">Dashboard</span>
+                    </a>
+                </li>
+
+                @if (userRole == "Admin" || userRole == "Faculty")
+                {
+                    <li class="sidebar-header">@txtManagement</li>
+
+                    @if (userRole == "Admin")
+                    {
+                        <li class="sidebar-item @(ctrl == "Student" ? "active" : "")">
+                            <a class="sidebar-link" href="/Student">
+                                <i data-feather="users"></i>
+                                <span class="align-middle">Students</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item @(ctrl == "Faculty" && action != "Schedule" && action != "MyCourses" ? "active" : "")">
+                            <a class="sidebar-link" href="/Faculty">
+                                <i data-feather="users"></i>
+                                <span class="align-middle">Faculties</span>
+                            </a>
+                        </li>
+                    }
+
+                    <li class="sidebar-item @(ctrl == "Course" ? "active" : "")">
+                        <a class="sidebar-link" href="/Course">
+                            <i data-feather="book-open"></i>
+                            <span class="align-middle">Courses</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Dataset" ? "active" : "")">
+                        <a class="sidebar-link" href="/Dataset">
+                            <i data-feather="database"></i>
+                            <span class="align-middle">Bulk Dataset</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Report" ? "active" : "")">
+                        <a class="sidebar-link" href="/Report">
+                            <i data-feather="pie-chart"></i>
+                            <span class="align-middle">Reports &amp; Analytics</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Assignment" ? "active" : "")">
+                        <a class="sidebar-link" href="/Assignment">
+                            <i data-feather="file"></i>
+                            <span class="align-middle">Assignments</span>
+                        </a>
+                    </li>
+
+                    @if (userRole == "Admin")
+                    {
+                        <li class="sidebar-item @(ctrl == "ServiceRequest" ? "active" : "")">
+                            <a class="sidebar-link" href="/ServiceRequest/Index">
+                                <i data-feather="inbox"></i>
+                                <span class="align-middle">Request Approval</span>
+                            </a>
+                        </li>
+
+                        <li class="sidebar-item @(ctrl == "Announcement" ? "active" : "")">
+                            <a class="sidebar-link" href="/Announcement">
+                                <i data-feather="bell"></i>
+                                <span class="align-middle">Announcements</span>
+                            </a>
+                        </li>
+                    }
+                }
+
+                @if (userRole == "Faculty")
+                {
+                    <li class="sidebar-header">@txtTeaching</li>
+
+                    <li class="sidebar-item @(ctrl == "Faculty" && action == "Schedule" ? "active" : "")">
+                        <a class="sidebar-link" href="/Faculty/Schedule">
+                            <i data-feather="calendar"></i>
+                            <span class="align-middle">Teaching Schedule</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Faculty" && action == "MyCourses" ? "active" : "")">
+                        <a class="sidebar-link" href="/Faculty/MyCourses">
+                            <i data-feather="book"></i>
+                            <span class="align-middle">My Assigned Courses</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Assignment" ? "active" : "")">
+                        <a class="sidebar-link" href="/Assignment">
+                            <i data-feather="file"></i>
+                            <span class="align-middle">Assignments</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Announcement" ? "active" : "")">
+                        <a class="sidebar-link" href="/Announcement">
+                            <i data-feather="bell"></i>
+                            <span class="align-middle">Announcements</span>
+                        </a>
+                    </li>
+                }
+
+                @if (userRole == "Student")
+                {
+                    <li class="sidebar-header">@txtAcademic</li>
+
+                    <li class="sidebar-item @(ctrl == "Enrollment" && action == "MyEnrollments" ? "active" : "")">
+                        <a class="sidebar-link" href="/Enrollment/MyEnrollments">
+                            <i data-feather="book"></i>
+                            <span class="align-middle">My Courses</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Enrollment" && action == "Timetable" ? "active" : "")">
+                        <a class="sidebar-link" href="/Enrollment/Timetable">
+                            <i data-feather="calendar"></i>
+                            <span class="align-middle">Weekly Timetable</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Enrollment" && action == "MarkReport" ? "active" : "")">
+                        <a class="sidebar-link" href="/Enrollment/MarkReport">
+                            <i data-feather="file-text"></i>
+                            <span class="align-middle">Mark Report</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Assignment" ? "active" : "")">
+                        <a class="sidebar-link" href="/Assignment">
+                            <i data-feather="file"></i>
+                            <span class="align-middle">Assignments</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Announcement" ? "active" : "")">
+                        <a class="sidebar-link" href="/Announcement">
+                            <i data-feather="bell"></i>
+                            <span class="align-middle">Announcements</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-header">Services &amp; Finance</li>
+
+                    <li class="sidebar-item @(ctrl == "ServiceRequest" ? "active" : "")">
+                        <a class="sidebar-link" href="/ServiceRequest">
+                            <i data-feather="file-plus"></i>
+                            <span class="align-middle">Service Requests</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Finance" ? "active" : "")">
+                        <a class="sidebar-link" href="/Finance">
+                            <i data-feather="credit-card"></i>
+                            <span class="align-middle">Tuition &amp; Finance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Feedback" ? "active" : "")">
+                        <a class="sidebar-link" href="/Feedback">
+                            <i data-feather="star"></i>
+                            <span class="align-middle">Teacher Feedback</span>
+                        </a>
+                    </li>
+                }
+
+                @if (userRole == "Parent")
+                {
+                    <li class="sidebar-header">Parent Portal</li>
+
+                    <li class="sidebar-item @(ctrl == "Parent" && (action == "Dashboard" || action == "Index") ? "active" : "")">
+                        <a class="sidebar-link" href="/Parent/Dashboard">
+                            <i data-feather="home"></i>
+                            <span class="align-middle">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Parent" && action == "Attendance" ? "active" : "")">
+                        <a class="sidebar-link" href="/Parent/Attendance">
+                            <i data-feather="check-square"></i>
+                            <span class="align-middle">Child's Attendance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Parent" && action == "Grades" ? "active" : "")">
+                        <a class="sidebar-link" href="/Parent/Grades">
+                            <i data-feather="award"></i>
+                            <span class="align-middle">Child's Grades</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Parent" && action == "Finance" ? "active" : "")">
+                        <a class="sidebar-link" href="/Parent/Finance">
+                            <i data-feather="dollar-sign"></i>
+                            <span class="align-middle">Child's Finance</span>
+                        </a>
+                    </li>
+
+                    <li class="sidebar-item @(ctrl == "Announcement" ? "active" : "")">
+                        <a class="sidebar-link" href="/Announcement">
+                            <i data-feather="bell"></i>
+                            <span class="align-middle">Announcements</span>
+                        </a>
+                    </li>
+                }
+            </ul>
+
+            <div class="sidebar-foot">
+                <span class="sidebar-foot__avatar" aria-hidden="true">@initials</span>
+                <span class="sidebar-foot__meta">
+                    <span class="sidebar-foot__name">@userName</span>
+                    <span class="sidebar-foot__role">@userRole</span>
+                </span>
+            </div>
+        </div>
+    </nav>
+
+    <!--  Main  -->
+    <div class="main">
+
+        <header class="sims-topbar">
+            <a class="sidebar-toggle js-sidebar-toggle" role="button" tabindex="0" aria-label="Toggle navigation">
+                <i data-feather="menu"></i>
+            </a>
+
+            <div class="sims-topbar__title">
+                <div class="sims-topbar__crumb">@SectionOf(ctrl)</div>
+                <div class="sims-topbar__page">@pageTitle</div>
+            </div>
+
+            <div class="sims-topbar__spacer"></div>
+
+            <div class="dropdown">
+                <a class="sims-rolechip" href="#" data-bs-toggle="dropdown" aria-expanded="false">
+                    <span class="sims-rolechip__avatar" aria-hidden="true">@initials</span>
+                    <span class="d-none d-sm-inline">@userName</span>
+                    <i data-feather="chevron-down" style="width:14px;height:14px;opacity:.5"></i>
+                </a>
+                <div class="dropdown-menu dropdown-menu-end shadow-sm" style="border-radius:12px;border-color:var(--sims-line);min-width:210px;">
+                    <div class="px-3 py-2">
+                        <div style="font-size:13px;font-weight:650;">@userName</div>
+                        <div class="text-muted" style="font-size:11.5px;">Signed in as @userRole</div>
+                    </div>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="/Settings" style="font-size:13px;">
+                        <i data-feather="user" style="width:14px;height:14px;" class="me-2"></i> Profile &amp; Settings
+                    </a>
+                    <a class="dropdown-item" href="/Auth/Logout" style="font-size:13px;">
+                        <i data-feather="log-out" style="width:14px;height:14px;" class="me-2"></i> Sign out
+                    </a>
+                </div>
+            </div>
+        </header>
+
+        <main class="content">
+
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i data-feather="check-circle" class="me-2 flex-shrink-0" style="width:17px;height:17px;"></i>
+                    <span>@TempData["Success"]</span>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+                    <i data-feather="alert-circle" class="me-2 flex-shrink-0" style="width:17px;height:17px;"></i>
+                    <span>@TempData["Error"]</span>
+                    <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+
+            @RenderBody()
+        </main>
+
+        <footer class="footer" style="background:transparent;border-top:1px solid var(--sims-line);padding:18px 32px;">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2"
+                 style="font-size:12.5px;color:var(--sims-muted);">
+                <span><strong style="color:var(--sims-ink-soft);">SIMS</strong> &copy; @DateTime.Now.Year — Student Information Management System</span>
+                <span>Unit 20: Applied Programming and Design Principles</span>
+            </div>
+        </footer>
+    </div>
+</div>
+}
+else
+{
+    @RenderBody()
+}
+
+<script src="~/js/adminkit.js" asp-append-version="true"></script>
+<script>
+    // Re-render Feather icons after AdminKit initialises, so icons added by
+    // partial views or dropdowns are also replaced.
+    if (window.feather) { window.feather.replace(); }
+</script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
