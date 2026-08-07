@@ -66,9 +66,9 @@ namespace DayNeCu3726.Controllers
         }
 
         [HttpGet]
-        public IActionResult Manage(string id)
+        [Route("Enrollment/Manage/{courseId?}")]
+        public IActionResult Manage(string courseId)
         {
-            string courseId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
@@ -110,9 +110,9 @@ namespace DayNeCu3726.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManageStudent(string id)
+        [Route("Enrollment/ManageStudent/{studentId?}")]
+        public IActionResult ManageStudent(string studentId)
         {
-            string studentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
@@ -154,9 +154,9 @@ namespace DayNeCu3726.Controllers
         }
 
         // Faculty: view students in a course and enter grades
-        public IActionResult CourseRoster(string id)
+        [Route("Enrollment/CourseRoster/{courseId?}")]
+        public IActionResult CourseRoster(string courseId)
         {
-            string courseId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
 
@@ -200,9 +200,9 @@ namespace DayNeCu3726.Controllers
 
         // Faculty: grade entry form
         [HttpGet]
-        public IActionResult Grade(string id)
+        [Route("Enrollment/Grade/{enrollmentId?}")]
+        public IActionResult Grade(string enrollmentId)
         {
-            string enrollmentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
 
@@ -278,9 +278,9 @@ namespace DayNeCu3726.Controllers
 
         // Student/Faculty: View detailed attendance report (30 sessions)
         [HttpGet]
-        public IActionResult Attendance(string id)
+        [Route("Enrollment/Attendance/{enrollmentId?}")]
+        public IActionResult Attendance(string enrollmentId)
         {
-            string enrollmentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
 
             var enrollment = FindEnrollment(enrollmentId);
