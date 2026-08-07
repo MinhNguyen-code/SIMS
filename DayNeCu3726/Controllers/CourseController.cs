@@ -60,7 +60,7 @@ namespace DayNeCu3726.Controllers
         public IActionResult Create()
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
-            if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
             var vm = new CourseViewModel
             {
@@ -87,7 +87,7 @@ namespace DayNeCu3726.Controllers
         public IActionResult Create(CourseViewModel model)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
-            if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
             if (!ModelState.IsValid)
             {
@@ -120,7 +120,7 @@ namespace DayNeCu3726.Controllers
         public IActionResult Edit(string id)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
-            if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
             var course = _courseService.GetCourseById(id);
             if (course == null) return NotFound();
@@ -136,7 +136,7 @@ namespace DayNeCu3726.Controllers
         public IActionResult Edit(string id, CourseViewModel model)
         {
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
-            if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
+            if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
             if (!ModelState.IsValid)
             {
