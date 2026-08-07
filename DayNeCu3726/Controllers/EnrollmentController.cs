@@ -66,8 +66,9 @@ namespace DayNeCu3726.Controllers
         }
 
         [HttpGet]
-        public IActionResult Manage(string courseId)
+        public IActionResult Manage(string id)
         {
+            string courseId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
@@ -109,8 +110,9 @@ namespace DayNeCu3726.Controllers
         }
 
         [HttpGet]
-        public IActionResult ManageStudent(string studentId)
+        public IActionResult ManageStudent(string id)
         {
+            string studentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() != "Admin") return RedirectToAction("AccessDenied", "Auth");
 
@@ -152,8 +154,9 @@ namespace DayNeCu3726.Controllers
         }
 
         // Faculty: view students in a course and enter grades
-        public IActionResult CourseRoster(string courseId)
+        public IActionResult CourseRoster(string id)
         {
+            string courseId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
 
@@ -197,8 +200,9 @@ namespace DayNeCu3726.Controllers
 
         // Faculty: grade entry form
         [HttpGet]
-        public IActionResult Grade(string enrollmentId)
+        public IActionResult Grade(string id)
         {
+            string enrollmentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
             if (GetRole() == "Student") return RedirectToAction("AccessDenied", "Auth");
 
@@ -274,8 +278,9 @@ namespace DayNeCu3726.Controllers
 
         // Student/Faculty: View detailed attendance report (30 sessions)
         [HttpGet]
-        public IActionResult Attendance(string enrollmentId)
+        public IActionResult Attendance(string id)
         {
+            string enrollmentId = id;
             if (!IsAuthenticated()) return RedirectToAction("Login", "Auth");
 
             var enrollment = FindEnrollment(enrollmentId);
