@@ -158,7 +158,7 @@ namespace DayNeCu3726.Tests.EndToEnd
         public async Task AuthenticatedStudent_IsDeniedAccessToTheAdminDatasetPage()
         {
             var client = _factory.CreateNonRedirectingClient();
-            await LoginAsync(client, "student@sims.edu", "Student@123");
+            await LoginAsync(client, "minh@sims.edu", "Student@123");
 
             var response = await client.GetAsync("/Dataset");
 

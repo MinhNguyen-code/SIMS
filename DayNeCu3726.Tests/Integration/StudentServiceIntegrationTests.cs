@@ -55,7 +55,6 @@ namespace DayNeCu3726.Tests.Integration
                 Email = "create@sims.edu",
                 Program = "Computer Science",
                 Department = "Computing",
-                Password = "MySecret@1",
                 EnrollmentYear = 2025,
                 DateOfBirth = new DateTime(2004, 1, 1),
                 Gender = "Male"
@@ -63,8 +62,8 @@ namespace DayNeCu3726.Tests.Integration
 
             Assert.True(success);
             Assert.NotNull(student);
-            Assert.NotEqual("MySecret@1", student!.PasswordHash);
-            Assert.True(_hasher.Verify("MySecret@1", student.PasswordHash));
+            Assert.NotEqual("Student@123", student!.PasswordHash);
+            Assert.True(_hasher.Verify("Student@123", student.PasswordHash));
         }
 
         [Fact]
