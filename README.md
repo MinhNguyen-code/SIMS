@@ -153,8 +153,9 @@ Tests run automatically on every push via GitHub Actions
 
 6. **Default Test Accounts**:
    * **Admin**: `admin@sims.edu` | Password: `Admin@123`
-   * **Faculty**: `faculty@sims.edu` | Password: `Faculty@123`
-   * **Student**: `student@sims.edu` | Password: `Student@123`
+   * **Faculty (Term 5)**: `faculty5@sims.edu` | Password: `Faculty@123`
+   * **Student (Minh)**: `minh@sims.edu` | Password: `Student@123`
+   * **Student (Vinh)**: `vinh@sims.edu` | Password: `Student@123`
 
 ---
 
