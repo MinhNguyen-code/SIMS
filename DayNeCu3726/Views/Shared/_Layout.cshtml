@@ -49,6 +49,7 @@
     {
         <link href="~/css/dark-mode.css" rel="stylesheet" asp-append-version="true" />
     }
+    @await RenderSectionAsync("Styles", required: false)
 </head>
 
 <body class="@(Context.Request.Cookies["theme"] == "dark" ? "dark-mode" : "")">
