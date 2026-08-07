@@ -143,12 +143,17 @@ namespace DayNeCu3726.Infrastructure
             uow.Students.Add(vinh);
             uow.Users.Add(vinh);
 
+            string[] lastNames = { "Nguyen", "Tran", "Le", "Pham", "Hoang", "Huynh", "Phan", "Vu", "Vo", "Dang", "Bui", "Do", "Ho", "Ngo", "Duong", "Ly" };
+            string[] middleNames = { "Thi", "Van", "Minh", "Huu", "Duc", "Ngoc", "Quang", "Tuan", "Hoang", "Thanh", "Bao", "Gia", "Xuan", "Quoc" };
+            string[] firstNames = { "Anh", "Binh", "Chau", "Dung", "Em", "Giang", "Hai", "Linh", "Kien", "Long", "Mai", "Nam", "Phuc", "Quan", "Son", "Trang", "Uyen", "Vinh", "Vy", "Yen" };
+
             for (int i = 2; i <= 99; i++)
             {
+                string fullName = $"{lastNames[rStu.Next(lastNames.Length)]} {middleNames[rStu.Next(middleNames.Length)]} {firstNames[rStu.Next(firstNames.Length)]}";
                 var s = new Student
                 {
                     Id = $"stu-{i:D3}",
-                    FullName = $"Student {i}",
+                    FullName = fullName,
                     Email = $"student{i}@sims.edu",
                     PasswordHash = hash("Student@123"),
                     StudentCode = $"BH{i:D5}",
